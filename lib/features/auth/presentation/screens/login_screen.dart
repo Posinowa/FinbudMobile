@@ -1,8 +1,10 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/network/dio_client.dart';
+import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:finbud_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -64,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (!mounted) return;
         
         print('🚀 Home\'a yönlendiriliyor...');
-        Navigator.pushReplacementNamed(context, '/home');
+        context.go(AppRoutes.dashboard);
       }
     } catch (e) {
       print('🔴 HATA: $e');
@@ -81,10 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
   void _navigateToRegister() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => RegisterScreen()),
-    );
-  }
+  context.push(AppRoutes.register);
+}
 
   void _handleForgotPassword() {
     ScaffoldMessenger.of(context).showSnackBar(

@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../../services/navigation_service.dart';
 
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
+
+  // BASE URL sabiti
+  static const String _baseUrl = 'http://10.0.2.2:8080';
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -70,7 +73,7 @@ class AuthInterceptor extends Interceptor {
 
       final refreshDio = Dio(
         BaseOptions(
-          baseUrl: dotenv.env['API_BASE_URL'] ?? '',
+          baseUrl: _baseUrl,  // ← DEĞİŞTİ
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -109,7 +112,7 @@ class AuthInterceptor extends Interceptor {
     );
 
     final retryDio = Dio(
-      BaseOptions(baseUrl: dotenv.env['API_BASE_URL'] ?? ''),
+      BaseOptions(baseUrl: _baseUrl),  // ← DEĞİŞTİ
     );
 
     return retryDio.request(

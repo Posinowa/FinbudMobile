@@ -1,5 +1,6 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/utils/validators.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -75,8 +76,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _navigateToLogin() {
-    Navigator.of(context).pop();
-  }
+  context.pop();
+}
 
   @override
   Widget build(BuildContext context) {
