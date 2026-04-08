@@ -2,6 +2,7 @@ import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/network/dio_client.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -50,34 +51,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return null;
   }
 
-  void _handleRegister() {
-    if (!_acceptTerms) {
+  Future<void> _handleRegister() async {
+  if (!_acceptTerms) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Kullanım koşullarını kabul etmelisiniz'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  if (_formKey.currentState!.validate()) {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await DioClient.instance.post(
+        '/auth/register',
+        data: {
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+        },
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        if (!mounted) return;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kayıt başarılı! Giriş yapabilirsiniz.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // Login ekranına yönlendir
+        context.pop();
+      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kullanım koşullarını kabul etmelisiniz'),
+        SnackBar(
+          content: Text('Kayıt başarısız: $e'),
           backgroundColor: Colors.red,
         ),
       );
-      return;
-    }
-
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      // TODO: API bağlantısı sonraki task'ta yapılacak
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!mounted) return;
+    } finally {
+      if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kayıt başarılı! (Demo)')),
-        );
-      });
+      }
     }
   }
+}
 
   void _navigateToLogin() {
   context.pop();
 }
+
 
   @override
   Widget build(BuildContext context) {
