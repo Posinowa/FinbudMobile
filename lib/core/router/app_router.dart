@@ -6,22 +6,25 @@ import 'package:finbud_app/features/dashboard/presentation/screens/dashboard_scr
 import 'package:finbud_app/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:finbud_app/features/user/presentation/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 
-
-
+/// Uygulama router yönetimi
+/// KAN-79: Uygulama açılışında token kontrolü
 class AppRouter {
   static final _storage = const FlutterSecureStorage();
   static late final GoRouter router;
   static bool _isInitialized = false;
 
+  /// Token key sabitleri (backend ile uyumlu)
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
+
   /// Router'ı başlat
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
-    final token = await _storage.read(key: 'auth_token');
+    final token = await _storage.read(key: _accessTokenKey);
     final isLoggedIn = token != null && token.isNotEmpty;
 
     router = GoRouter(
@@ -40,28 +43,38 @@ class AppRouter {
     BuildContext context,
     GoRouterState state,
   ) async {
-    final token = await _storage.read(key: 'access_token');
+    final token = await _storage.read(key: _accessTokenKey);
     final isLoggedIn = token != null && token.isNotEmpty;
 
     final isAuthRoute = state.matchedLocation == AppRoutes.login ||
         state.matchedLocation == AppRoutes.register;
 
-    // Token yoksa ve auth route'ta değilse -> login'e yönlendir
     if (!isLoggedIn && !isAuthRoute) {
       return AppRoutes.login;
     }
 
-    // Token varsa ve auth route'taysa -> dashboard'a yönlendir
     if (isLoggedIn && isAuthRoute) {
       return AppRoutes.dashboard;
     }
 
-    return null; // Yönlendirme yok, devam et
+    return null;
+  }
+
+  /// Logout işlemi - token'ları temizle
+  static Future<void> logout() async {
+    await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
+    router.go(AppRoutes.login);
+  }
+
+  /// Token'ları kontrol et
+  static Future<bool> hasValidToken() async {
+    final token = await _storage.read(key: _accessTokenKey);
+    return token != null && token.isNotEmpty;
   }
 
   /// Tüm route tanımları
   static final List<RouteBase> _routes = [
-    // ========== Auth Routes ==========
     GoRoute(
       path: AppRoutes.login,
       name: 'login',
@@ -72,8 +85,6 @@ class AppRouter {
       name: 'register',
       builder: (context, state) => const RegisterScreen(),
     ),
-
-    // ========== Main App Routes ==========
     GoRoute(
       path: AppRoutes.dashboard,
       name: 'dashboard',
