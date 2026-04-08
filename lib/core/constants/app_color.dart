@@ -71,4 +71,9 @@ class AppColors {
   static Color successLight = success.withOpacity(0.1);
   static Color dangerLight = danger.withOpacity(0.1);
   static Color warningLight = warning.withOpacity(0.1);
+
+
+  //hata ve başarı mesajları için renkler
+  static const Color error = Color(0xFFD98989);
+  static const Color successMessage = Color(0xFF7FB685);
 }

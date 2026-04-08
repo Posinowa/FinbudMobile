@@ -1,25 +1,22 @@
 import 'package:finbud_app/core/constants/app_color.dart';
-import 'package:finbud_app/core/network/dio_client.dart';
 import 'package:finbud_app/core/router/app_routes.dart';
-import 'package:finbud_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:finbud_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/utils/validators.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  bool _isLoading = false;
   bool _obscurePassword = true;
 
   @override
@@ -30,61 +27,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-  print('🟢 _handleLogin ÇAĞRILDI!');
-  
-  if (_formKey.currentState!.validate()) {
-    print('🟢 Validasyon geçti!');
-    setState(() => _isLoading = true);
-
-    try {
-      print('🔄 Login isteği gönderiliyor...');
-      print('🔄 Login isteği gönderiliyor...');
-      print('📧 Email: ${_emailController.text.trim()}');
-      
-      final response = await DioClient.instance.post(
-        '/auth/login',
-        data: {
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-        },
+    if (_formKey.currentState!.validate()) {
+      final success = await ref.read(authProvider.notifier).login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       );
 
-      print('✅ Response status: ${response.statusCode}');
-      print('📦 Response data: ${response.data}');
+      if (!mounted) return;
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        
-        print('🔑 Access token: ${data['access_token']?.substring(0, 20)}...');
-        
-        // Token'ları kaydet
-        await _storage.write(key: 'access_token', value: data['access_token']);
-        await _storage.write(key: 'refresh_token', value: data['refresh_token']);
-        
-        print('💾 Token\'lar kaydedildi');
-
-        if (!mounted) return;
-        
-        print('🚀 Home\'a yönlendiriliyor...');
+      if (success) {
         context.go(AppRoutes.dashboard);
       }
-    } catch (e) {
-      print('🔴 HATA: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Giriş başarısız: $e')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      // Hata durumunda authErrorProvider'dan mesaj gösterilecek
     }
   }
-}
 
   void _navigateToRegister() {
-  context.push(AppRoutes.register);
-}
+    context.push(AppRoutes.register);
+  }
 
   void _handleForgotPassword() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -92,9 +52,36 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+    // Riverpod state'lerini dinle
+    final isLoading = ref.watch(isLoadingProvider);
+    final errorMessage = ref.watch(authErrorProvider);
+
+    // Hata mesajı varsa göster
+    ref.listen<String?>(authErrorProvider, (previous, next) {
+      if (next != null && next.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            action: SnackBarAction(
+              label: 'Kapat',
+              textColor: Colors.white,
+              onPressed: () {
+                ref.read(authProvider.notifier).clearError();
+              },
+            ),
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -134,12 +121,41 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 48),
 
+                  // Hata mesajı banner (opsiyonel - inline gösterim)
+                  if (errorMessage != null && errorMessage.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              errorMessage,
+                              style: TextStyle(color: AppColors.error, fontSize: 14),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => ref.read(authProvider.notifier).clearError(),
+                            child: Icon(Icons.close, color: AppColors.error, size: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   // Email Field
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     validator: Validators.validateEmail,
+                    enabled: !isLoading,
                     decoration: InputDecoration(
                       labelText: 'E-posta',
                       hintText: 'ornek@email.com',
@@ -168,6 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
                     validator: Validators.validatePassword,
+                    enabled: !isLoading,
                     onFieldSubmitted: (_) => _handleLogin(),
                     decoration: InputDecoration(
                       labelText: 'Şifre',
@@ -205,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: _handleForgotPassword,
+                      onPressed: isLoading ? null : _handleForgotPassword,
                       child: const Text(
                         'Şifremi Unuttum',
                         style: TextStyle(color: AppColors.textSecondary),
@@ -218,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
+                      onPressed: isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.secondary,
                         foregroundColor: Colors.white,
@@ -227,23 +244,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         elevation: 2,
                       ),
-                      child:
-                          _isLoading
-                              ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Text(
-                                'Giriş Yap',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
                               ),
+                            )
+                          : const Text(
+                              'Giriş Yap',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -257,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: AppColors.textSecondary),
                       ),
                       TextButton(
-                        onPressed: _navigateToRegister,
+                        onPressed: isLoading ? null : _navigateToRegister,
                         child: const Text(
                           'Kayıt Ol',
                           style: TextStyle(

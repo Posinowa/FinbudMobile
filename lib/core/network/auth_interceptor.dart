@@ -1,14 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../services/navigation_service.dart';
 
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
-
-  // BASE URL sabiti
-  static const String _baseUrl = 'http://10.0.2.2:8080';
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -73,7 +70,7 @@ class AuthInterceptor extends Interceptor {
 
       final refreshDio = Dio(
         BaseOptions(
-          baseUrl: _baseUrl,  // ← DEĞİŞTİ
+          baseUrl: dotenv.env['API_BASE_URL'] ?? '',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -112,7 +109,7 @@ class AuthInterceptor extends Interceptor {
     );
 
     final retryDio = Dio(
-      BaseOptions(baseUrl: _baseUrl),  // ← DEĞİŞTİ
+      BaseOptions(baseUrl: dotenv.env['API_BASE_URL'] ?? ''),
     );
 
     return retryDio.request(
@@ -124,15 +121,8 @@ class AuthInterceptor extends Interceptor {
   }
 
   Future<void> _performLogout() async {
-    print('🚪 Logout yapılıyor...');
-    
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
-    
-    print('🗑️ Token\'lar silindi');
-    
     NavigationService.toLoginAndClearStack();
-    
-    print('✅ Logout tamamlandı');
   }
 }

@@ -1,4 +1,5 @@
 import 'package:finbud_app/core/router/app_routes.dart';
+import 'package:finbud_app/core/shared/widgets/main_scaffold.dart';
 import 'package:finbud_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:finbud_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:finbud_app/features/budget/presentation/screens/budget_screen.dart';
@@ -11,16 +12,15 @@ import 'package:go_router/go_router.dart';
 
 /// Uygulama router yönetimi
 /// KAN-79: Uygulama açılışında token kontrolü
+/// KAN-80: Bottom navigation bar için ShellRoute
 class AppRouter {
   static final _storage = const FlutterSecureStorage();
   static late final GoRouter router;
   static bool _isInitialized = false;
 
-  /// Token key sabitleri (backend ile uyumlu)
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
 
-  /// Router'ı başlat
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -38,7 +38,6 @@ class AppRouter {
     _isInitialized = true;
   }
 
-  /// Route guard - Token kontrolü
   static Future<String?> _guardRoute(
     BuildContext context,
     GoRouterState state,
@@ -60,21 +59,20 @@ class AppRouter {
     return null;
   }
 
-  /// Logout işlemi - token'ları temizle
   static Future<void> logout() async {
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
     router.go(AppRoutes.login);
   }
 
-  /// Token'ları kontrol et
   static Future<bool> hasValidToken() async {
     final token = await _storage.read(key: _accessTokenKey);
     return token != null && token.isNotEmpty;
   }
 
-  /// Tüm route tanımları
+  /// KAN-80: ShellRoute ile bottom navigation bar
   static final List<RouteBase> _routes = [
+    // Auth routes - bottom nav bar YOK
     GoRoute(
       path: AppRoutes.login,
       name: 'login',
@@ -85,29 +83,43 @@ class AppRouter {
       name: 'register',
       builder: (context, state) => const RegisterScreen(),
     ),
-    GoRoute(
-      path: AppRoutes.dashboard,
-      name: 'dashboard',
-      builder: (context, state) => const DashboardScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.transactions,
-      name: 'transactions',
-      builder: (context, state) => const TransactionScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.budget,
-      name: 'budget',
-      builder: (context, state) => const BudgetScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.profile,
-      name: 'profile',
-      builder: (context, state) => const ProfileScreen(),
+
+    // Main routes - bottom nav bar VAR
+    ShellRoute(
+      builder: (context, state, child) => MainScaffold(child: child),
+      routes: [
+        GoRoute(
+          path: AppRoutes.dashboard,
+          name: 'dashboard',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: DashboardScreen(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.transactions,
+          name: 'transactions',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: TransactionScreen(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.budget,
+          name: 'budget',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: BudgetScreen(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.profile,
+          name: 'profile',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: ProfileScreen(),
+          ),
+        ),
+      ],
     ),
   ];
 
-  /// Hata sayfası
   static Widget _errorBuilder(BuildContext context, GoRouterState state) {
     return Scaffold(
       appBar: AppBar(title: const Text('Hata')),
