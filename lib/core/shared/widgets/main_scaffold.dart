@@ -1,6 +1,6 @@
-
-
+import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/router/app_routes.dart';
+import 'package:finbud_app/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,6 +44,9 @@ class MainScaffold extends StatelessWidget {
       
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTransactionSheet(context),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -82,39 +85,8 @@ class MainScaffold extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (ctx, scrollController) => Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Yeni Islem Ekle',
-                style: Theme.of(ctx).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 24),
-              const Center(
-                child: Text('Islem formu burada olacak'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => const AddTransactionSheet(),
     );
   }
 }

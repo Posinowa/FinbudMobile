@@ -11,7 +11,7 @@ class DashboardRepository {
       }
 
       final response = await DioClient.instance.get(
-        '/dashboard/summary',
+        '/api/v1/dashboard/summary',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 

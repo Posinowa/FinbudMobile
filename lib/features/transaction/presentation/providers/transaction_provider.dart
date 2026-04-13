@@ -1,4 +1,5 @@
-// lib/features/transaction/presentation/providers/transaction_provider.dart    
+// lib/features/transaction/presentation/providers/transaction_provider.dart
+import 'package:finbud_app/core/network/dio_client.dart';
 import 'package:finbud_app/features/transaction/data/models/transaction_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
@@ -7,7 +8,7 @@ import '../../data/repositories/transaction_repository.dart';
 import 'transaction_state.dart';
 
 // ============ TEST MODE - API hazır olunca false yap ============
-const bool kUseMockData = true;
+const bool kUseMockData = false;
 
 // ============ MOCK DATA ============
 final List<TransactionModel> _mockTransactions = [
@@ -17,7 +18,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.income,
     date: '2026-04-10',
     description: 'Maaş',
-    category: const CategoryResponse(id: 'c1', name: 'Maaş', icon: '💰', type: 'income'),
+    category: const CategoryResponse(
+      id: 'c1',
+      name: 'Maaş',
+      icon: '💰',
+      type: 'income',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -27,7 +33,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.expense,
     date: '2026-04-09',
     description: 'Market alışverişi',
-    category: const CategoryResponse(id: 'c2', name: 'Market', icon: '🛒', type: 'expense'),
+    category: const CategoryResponse(
+      id: 'c2',
+      name: 'Market',
+      icon: '🛒',
+      type: 'expense',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -37,7 +48,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.expense,
     date: '2026-04-08',
     description: 'Kira ödemesi',
-    category: const CategoryResponse(id: 'c3', name: 'Kira', icon: '🏠', type: 'expense'),
+    category: const CategoryResponse(
+      id: 'c3',
+      name: 'Kira',
+      icon: '🏠',
+      type: 'expense',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -47,7 +63,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.expense,
     date: '2026-04-07',
     description: 'Elektrik faturası',
-    category: const CategoryResponse(id: 'c4', name: 'Faturalar', icon: '💡', type: 'expense'),
+    category: const CategoryResponse(
+      id: 'c4',
+      name: 'Faturalar',
+      icon: '💡',
+      type: 'expense',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -57,7 +78,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.income,
     date: '2026-04-06',
     description: 'Freelance proje',
-    category: const CategoryResponse(id: 'c5', name: 'Ek Gelir', icon: '💼', type: 'income'),
+    category: const CategoryResponse(
+      id: 'c5',
+      name: 'Ek Gelir',
+      icon: '💼',
+      type: 'income',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -67,7 +93,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.expense,
     date: '2026-04-05',
     description: 'Netflix + Spotify',
-    category: const CategoryResponse(id: 'c6', name: 'Abonelikler', icon: '📺', type: 'expense'),
+    category: const CategoryResponse(
+      id: 'c6',
+      name: 'Abonelikler',
+      icon: '📺',
+      type: 'expense',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -77,7 +108,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.expense,
     date: '2026-04-04',
     description: 'Akaryakıt',
-    category: const CategoryResponse(id: 'c7', name: 'Ulaşım', icon: '⛽', type: 'expense'),
+    category: const CategoryResponse(
+      id: 'c7',
+      name: 'Ulaşım',
+      icon: '⛽',
+      type: 'expense',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -87,7 +123,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.income,
     date: '2026-04-03',
     description: 'Yatırım getirisi',
-    category: const CategoryResponse(id: 'c8', name: 'Yatırım', icon: '📈', type: 'income'),
+    category: const CategoryResponse(
+      id: 'c8',
+      name: 'Yatırım',
+      icon: '📈',
+      type: 'income',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -97,7 +138,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.expense,
     date: '2026-04-02',
     description: 'Yeni ayakkabı',
-    category: const CategoryResponse(id: 'c9', name: 'Giyim', icon: '👟', type: 'expense'),
+    category: const CategoryResponse(
+      id: 'c9',
+      name: 'Giyim',
+      icon: '👟',
+      type: 'expense',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -107,7 +153,12 @@ final List<TransactionModel> _mockTransactions = [
     type: TransactionType.expense,
     date: '2026-04-01',
     description: 'Restoran',
-    category: const CategoryResponse(id: 'c10', name: 'Yeme-İçme', icon: '🍽️', type: 'expense'),
+    category: const CategoryResponse(
+      id: 'c10',
+      name: 'Yeme-İçme',
+      icon: '🍽️',
+      type: 'expense',
+    ),
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   ),
@@ -115,26 +166,20 @@ final List<TransactionModel> _mockTransactions = [
 
 // ============ PROVIDERS ============
 
-/// Dio Provider - Kendi dio provider'ınızla değiştirin
-final dioProvider = Provider<Dio>((ref) {
-  // TODO: Kendi Dio instance'ınızı buraya ekleyin
-  throw UnimplementedError('dioProvider must be overridden');
-});
-
-/// Repository Provider
+/// Repository Provider - DioClient.instance kullanıyor
 final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
-  final dio = ref.watch(dioProvider);
-  return TransactionRepository(dio);
+  return TransactionRepository(DioClient.instance);
 });
 
 /// Transaction List Provider - Ana provider
-final transactionProvider = StateNotifierProvider<TransactionNotifier, TransactionState>((ref) {
-  if (kUseMockData) {
-    return TransactionNotifier.mock();
-  }
-  final repository = ref.watch(transactionRepositoryProvider);
-  return TransactionNotifier(repository);
-});
+final transactionProvider =
+    StateNotifierProvider<TransactionNotifier, TransactionState>((ref) {
+      if (kUseMockData) {
+        return TransactionNotifier.mock();
+      }
+      final repository = ref.watch(transactionRepositoryProvider);
+      return TransactionNotifier(repository);
+    });
 
 // ============ NOTIFIER ============
 
@@ -143,23 +188,23 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   final bool _useMock;
 
   // Normal constructor (API ile)
-  TransactionNotifier(TransactionRepository repository) 
-      : _repository = repository,
-        _useMock = false,
-        super(const TransactionState());
+  TransactionNotifier(TransactionRepository repository)
+    : _repository = repository,
+      _useMock = false,
+      super(const TransactionState());
 
   // Mock constructor (Test için)
-  TransactionNotifier.mock() 
-      : _repository = null,
-        _useMock = true,
-        super(const TransactionState());
+  TransactionNotifier.mock()
+    : _repository = null,
+      _useMock = true,
+      super(const TransactionState());
 
   // ============ FİLTRE İŞLEMLERİ ============
 
   /// Tip filtresi ayarla
   void setTypeFilter(String? type) {
     if (state.filter.type == type) return;
-    
+
     state = state.copyWith(
       filter: state.filter.copyWith(
         type: type,
@@ -173,7 +218,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// Ay filtresi ayarla (YYYY-MM formatında)
   void setMonthFilter(String? month) {
     if (state.filter.month == month) return;
-    
+
     state = state.copyWith(
       filter: state.filter.copyWith(
         month: month,
@@ -187,7 +232,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// Kategori filtresi ayarla
   void setCategoryFilter(String? categoryId) {
     if (state.filter.categoryId == categoryId) return;
-    
+
     state = state.copyWith(
       filter: state.filter.copyWith(
         categoryId: categoryId,
@@ -201,7 +246,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   /// Tüm filtreleri temizle
   void clearFilters() {
     if (!state.filter.hasActiveFilters) return;
-    
+
     state = state.copyWith(filter: const TransactionFilter());
     refresh();
   }
@@ -226,7 +271,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   Future<void> _refreshApi() async {
     try {
       final response = await _repository!.getTransactions(filter: state.filter);
-      
+
       state = state.copyWith(
         transactions: response.data,
         meta: response.meta,
@@ -249,16 +294,18 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
 
     // Tip filtresi uygula
     if (state.filter.type != null) {
-      filteredData = filteredData.where((t) {
-        return state.filter.type == 'income' ? t.isIncome : t.isExpense;
-      }).toList();
+      filteredData =
+          filteredData.where((t) {
+            return state.filter.type == 'income' ? t.isIncome : t.isExpense;
+          }).toList();
     }
 
     // Ay filtresi uygula
     if (state.filter.month != null) {
-      filteredData = filteredData.where((t) {
-        return t.date.startsWith(state.filter.month!);
-      }).toList();
+      filteredData =
+          filteredData.where((t) {
+            return t.date.startsWith(state.filter.month!);
+          }).toList();
     }
 
     // Pagination
@@ -266,13 +313,14 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     final page = state.filter.page;
     final startIndex = (page - 1) * limit;
     final endIndex = startIndex + limit;
-    
-    final paginatedData = filteredData.length > startIndex
-        ? filteredData.sublist(
-            startIndex, 
-            endIndex > filteredData.length ? filteredData.length : endIndex,
-          )
-        : <TransactionModel>[];
+
+    final paginatedData =
+        filteredData.length > startIndex
+            ? filteredData.sublist(
+              startIndex,
+              endIndex > filteredData.length ? filteredData.length : endIndex,
+            )
+            : <TransactionModel>[];
 
     final totalPages = (filteredData.length / limit).ceil();
 
@@ -307,7 +355,7 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     try {
       final newFilter = state.filter.copyWith(page: state.filter.page + 1);
       final response = await _repository!.getTransactions(filter: newFilter);
-      
+
       state = state.copyWith(
         transactions: [...state.transactions, ...response.data],
         meta: response.meta,
@@ -329,21 +377,23 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     var filteredData = List<TransactionModel>.from(_mockTransactions);
 
     if (state.filter.type != null) {
-      filteredData = filteredData.where((t) {
-        return state.filter.type == 'income' ? t.isIncome : t.isExpense;
-      }).toList();
+      filteredData =
+          filteredData.where((t) {
+            return state.filter.type == 'income' ? t.isIncome : t.isExpense;
+          }).toList();
     }
 
     final limit = state.filter.limit;
     final startIndex = (newPage - 1) * limit;
     final endIndex = startIndex + limit;
 
-    final newData = filteredData.length > startIndex
-        ? filteredData.sublist(
-            startIndex,
-            endIndex > filteredData.length ? filteredData.length : endIndex,
-          )
-        : <TransactionModel>[];
+    final newData =
+        filteredData.length > startIndex
+            ? filteredData.sublist(
+              startIndex,
+              endIndex > filteredData.length ? filteredData.length : endIndex,
+            )
+            : <TransactionModel>[];
 
     final totalPages = (filteredData.length / limit).ceil();
 
@@ -387,33 +437,32 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
 
   void _removeFromList(String id) {
     final updatedList = state.transactions.where((t) => t.id != id).toList();
-    final updatedMeta = state.meta != null
-        ? PaginationMeta(
-            total: state.meta!.total - 1,
-            page: state.meta!.page,
-            limit: state.meta!.limit,
-            totalPages: state.meta!.totalPages,
-          )
-        : null;
+    final updatedMeta =
+        state.meta != null
+            ? PaginationMeta(
+              total: state.meta!.total - 1,
+              page: state.meta!.page,
+              limit: state.meta!.limit,
+              totalPages: state.meta!.totalPages,
+            )
+            : null;
 
-    state = state.copyWith(
-      transactions: updatedList,
-      meta: updatedMeta,
-    );
+    state = state.copyWith(transactions: updatedList, meta: updatedMeta);
   }
 
   /// Yeni transaction eklendiğinde
   void onTransactionCreated(TransactionModel transaction) {
     state = state.copyWith(
       transactions: [transaction, ...state.transactions],
-      meta: state.meta != null
-          ? PaginationMeta(
-              total: state.meta!.total + 1,
-              page: state.meta!.page,
-              limit: state.meta!.limit,
-              totalPages: state.meta!.totalPages,
-            )
-          : null,
+      meta:
+          state.meta != null
+              ? PaginationMeta(
+                total: state.meta!.total + 1,
+                page: state.meta!.page,
+                limit: state.meta!.limit,
+                totalPages: state.meta!.totalPages,
+              )
+              : null,
     );
   }
 
@@ -425,5 +474,95 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
       updatedList[index] = transaction;
       state = state.copyWith(transactions: updatedList);
     }
+  }
+
+  /// Yeni transaction oluştur
+  Future<bool> createTransaction({
+    required double amount,
+    required String type,
+    required String categoryId,
+    required String date,
+    String? description,
+  }) async {
+    if (_useMock) {
+      return _createTransactionMock(
+        amount: amount,
+        type: type,
+        categoryId: categoryId,
+        date: date,
+        description: description,
+      );
+    }
+    return _createTransactionApi(
+      amount: amount,
+      type: type,
+      categoryId: categoryId,
+      date: date,
+      description: description,
+    );
+  }
+
+  Future<bool> _createTransactionApi({
+    required double amount,
+    required String type,
+    required String categoryId,
+    required String date,
+    String? description,
+  }) async {
+    try {
+      final transaction = await _repository!.createTransaction(
+        amount: amount,
+        type: type,
+        categoryId: categoryId,
+        date: date,
+        description: description,
+      );
+
+      // Listeyi API'den yeniden çek
+      await refresh();
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> _createTransactionMock({
+    required double amount,
+    required String type,
+    required String categoryId,
+    required String date,
+    String? description,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // Mock kategori bul
+    final mockCategory =
+        _mockTransactions
+            .firstWhere(
+              (t) => t.category.id == categoryId,
+              orElse: () => _mockTransactions.first,
+            )
+            .category;
+
+    final newTransaction = TransactionModel(
+      id: 'mock_${DateTime.now().millisecondsSinceEpoch}',
+      amount: amount,
+      type: type == 'income' ? TransactionType.income : TransactionType.expense,
+      date: date,
+      description: description,
+      category: CategoryResponse(
+        id: categoryId,
+        name: mockCategory.name,
+        icon: mockCategory.icon,
+        type: type,
+      ),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    onTransactionCreated(newTransaction);
+    return true;
   }
 }

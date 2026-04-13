@@ -15,7 +15,7 @@ class TransactionRepository {
   }) async {
     try {
       final response = await _dio.get(
-        '/transactions',
+        '/api/v1/transactions',
         queryParameters: filter.toQueryParameters(),
       );
       return TransactionListResponse.fromJson(response.data as Map<String, dynamic>);
@@ -27,7 +27,7 @@ class TransactionRepository {
   /// Tek bir transaction getir
   Future<TransactionModel> getTransactionById(String id) async {
     try {
-      final response = await _dio.get('/transactions/$id');
+      final response = await _dio.get('/api/v1/transactions/$id');
       return TransactionModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -44,7 +44,7 @@ class TransactionRepository {
   }) async {
     try {
       final response = await _dio.post(
-        '/transactions',
+        '/api/v1/transactions',
         data: {
           'amount': amount,
           'type': type,
@@ -74,7 +74,7 @@ class TransactionRepository {
       if (description != null) data['description'] = description;
       if (date != null) data['date'] = date;
 
-      final response = await _dio.put('/transactions/$id', data: data);
+      final response = await _dio.put('/api/v1/transactions/$id', data: data);
       return TransactionModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -84,7 +84,7 @@ class TransactionRepository {
   /// Transaction sil
   Future<void> deleteTransaction(String id) async {
     try {
-      await _dio.delete('/transactions/$id');
+      await _dio.delete('/api/v1/transactions/$id');
     } on DioException catch (e) {
       throw _handleError(e);
     }
