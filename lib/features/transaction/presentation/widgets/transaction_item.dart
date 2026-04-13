@@ -1,121 +1,199 @@
+// lib/features/transaction/presentation/widgets/transaction_item.dart
+
+import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_color.dart';
 import '../../data/models/transaction_model.dart';
 
-class TransactionListItem extends StatelessWidget {
+class TransactionItem extends StatelessWidget {
   final TransactionModel transaction;
+  final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
-  const TransactionListItem({
+  const TransactionItem({
     super.key,
     required this.transaction,
+    this.onTap,
+    this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    final amountColor = transaction.isIncome ? AppColors.income : AppColors.expense;
-    final amountPrefix = transaction.isIncome ? '+' : '-';
-    final title = transaction.description.isNotEmpty
-        ? transaction.description
-        : transaction.categoryName;
+    // Renk kodlaması: Gelir = Yeşil (income), Gider = Kırmızı (expense)
+    final isIncome = transaction.isIncome;
+    final color = isIncome ? AppColors.income : AppColors.expense;
+    final backgroundColor = isIncome ? AppColors.successLight : AppColors.dangerLight;
+    final sign = isIncome ? '+' : '-';
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+    // Tarih formatı
+    final dateFormat = DateFormat('dd MMM yyyy', 'tr_TR');
+    final formattedDate = dateFormat.format(transaction.dateTime);
+
+    return Dismissible(
+      key: Key(transaction.id),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        onDelete?.call();
+        return false;
+      },
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: AppColors.danger,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(
+          Icons.delete_outline_rounded,
+          color: Colors.white,
+          size: 24,
+        ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: amountColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              _getCategoryIcon(transaction.categoryIcon),
-              color: amountColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  transaction.categoryName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$amountPrefix${_formatAmount(transaction.amount)}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: amountColor,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                DateFormat('dd MMM yyyy', 'tr_TR').format(transaction.date),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textHint,
-                ),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-        ],
+          child: Row(
+            children: [
+              // Sol: İkon
+              _buildIcon(color, backgroundColor),
+              const SizedBox(width: 14),
+
+              // Orta: Açıklama ve tarih
+              Expanded(child: _buildContent(formattedDate)),
+
+              // Sağ: Tutar
+              _buildAmount(sign, color),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  String _formatAmount(double amount) {
+  Widget _buildIcon(Color color, Color backgroundColor) {
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Center(
+        child: Icon(
+          transaction.isIncome
+              ? Icons.arrow_downward_rounded
+              : Icons.arrow_upward_rounded,
+          color: color,
+          size: 24,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(String formattedDate) {
+    final title = transaction.description?.isNotEmpty == true
+        ? transaction.description!
+        : transaction.category.name;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            if (transaction.category.icon != null) ...[
+              Text(transaction.category.icon!, style: const TextStyle(fontSize: 12)),
+              const SizedBox(width: 4),
+            ],
+            Flexible(
+              child: Text(
+                transaction.category.name,
+                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 4,
+              height: 4,
+              decoration: const BoxDecoration(
+                color: AppColors.textHint,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              formattedDate,
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAmount(String sign, Color color) {
     final formatter = NumberFormat.currency(
       locale: 'tr_TR',
       symbol: '₺',
       decimalDigits: 2,
     );
-    return formatter.format(amount.abs());
-  }
+    final formattedAmount = formatter.format(transaction.amount);
 
-  IconData _getCategoryIcon(String? iconKey) {
-    final iconMap = <String, IconData>{
-      'food': Icons.restaurant,
-      'transport': Icons.directions_car,
-      'shopping': Icons.shopping_bag,
-      'entertainment': Icons.movie,
-      'health': Icons.medical_services,
-      'salary': Icons.work,
-      'investment': Icons.trending_up,
-    };
-    final key = (iconKey ?? '').toLowerCase();
-    return iconMap[key] ?? Icons.receipt_long_outlined;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          '$sign$formattedAmount',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            transaction.isIncome ? 'Gelir' : 'Gider',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

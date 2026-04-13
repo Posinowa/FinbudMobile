@@ -1,4 +1,5 @@
-﻿import 'package:finbud_app/core/constants/app_color.dart';
+
+
 import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,15 +41,12 @@ class MainScaffold extends StatelessWidget {
     
     return Scaffold(
       body: child,
-
+      
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _onAddPressed(context),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
-        elevation: 4,
+        onPressed: () => _showAddTransactionSheet(context),
         child: const Icon(Icons.add),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
@@ -57,7 +55,7 @@ class MainScaffold extends StatelessWidget {
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            label: 'Anasayfa',
           ),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
@@ -79,92 +77,42 @@ class MainScaffold extends StatelessWidget {
     );
   }
 
-  /// Gelir/gider ekleme ekranı henüz yok; işlemler sekmesine yönlendirilir.
-  void _onAddPressed(BuildContext context) {
-    _showAddTransactionSheet(context);
-  }
-
   void _showAddTransactionSheet(BuildContext context) {
-    showModalBottomSheet<void>(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       useSafeArea: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (ctx, scrollController) => Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Yeni işlem',
-              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'İşlem ekleme formu hazır olduğunda buradan açılacak. Şimdilik işlemler sayfasına gidebilirsiniz.',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
+              const SizedBox(height: 16),
+              Text(
+                'Yeni Islem Ekle',
+                style: Theme.of(ctx).textTheme.headlineSmall,
               ),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.add_circle_outline, color: AppColors.income),
-              title: const Text('Gelir ekle'),
-              subtitle: const Text(
-                'İşlemler sayfasına gider',
-                style: TextStyle(fontSize: 12, color: AppColors.textHint),
+              const SizedBox(height: 24),
+              const Center(
+                child: Text('Islem formu burada olacak'),
               ),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                context.go(AppRoutes.transactions);
-              },
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading:
-                  Icon(Icons.remove_circle_outline, color: AppColors.expense),
-              title: const Text('Gider ekle'),
-              subtitle: const Text(
-                'İşlemler sayfasına gider',
-                style: TextStyle(fontSize: 12, color: AppColors.textHint),
-              ),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                context.go(AppRoutes.transactions);
-              },
-            ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                context.go(AppRoutes.transactions);
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.textOnPrimary,
-              ),
-              icon: const Icon(Icons.receipt_long_outlined),
-              label: const Text('Tüm işlemler'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,85 +1,139 @@
+// lib/features/transaction/data/repositories/transaction_repository.dart
+
 import 'package:dio/dio.dart';
-import '../../../../core/network/dio_client.dart';
 import '../models/transaction_model.dart';
 
+/// Transaction Repository - API çağrıları
 class TransactionRepository {
-  Future<Map<String, dynamic>> getTransactions({
-    required int page,
-    required int limit,
-    String? month,
-    TransactionType? type,
+  final Dio _dio;
+
+  TransactionRepository(this._dio);
+
+  /// Transaction listesini getir
+  Future<TransactionListResponse> getTransactions({
+    TransactionFilter filter = const TransactionFilter(),
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'limit': limit,
-      };
-
-      if (month != null && month.isNotEmpty) {
-        queryParams['month'] = month;
-      }
-      if (type != null) {
-        queryParams['type'] = type.value;
-      }
-
-      final response = await DioClient.instance.get(
+      final response = await _dio.get(
         '/transactions',
-        queryParameters: queryParams,
+        queryParameters: filter.toQueryParameters(),
       );
-
-      if (response.statusCode == 200) {
-        return {
-          'success': true,
-          'data': TransactionPage.fromResponse(
-            payload: response.data,
-            requestedPage: page,
-            requestedLimit: limit,
-          ),
-        };
-      }
-
-      return {
-        'success': false,
-        'error': 'Islemler yuklenirken bir hata olustu',
-      };
+      return TransactionListResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      String errorMessage;
-      if (e.response != null) {
-        switch (e.response!.statusCode) {
-          case 401:
-            errorMessage = 'Oturum sureniz doldu. Lutfen tekrar giris yapin.';
-            break;
-          case 403:
-            errorMessage = 'Bu islemi yapma yetkiniz bulunmuyor.';
-            break;
-          case 404:
-            errorMessage = 'Islem kayitlari bulunamadi.';
-            break;
-          case 500:
-            errorMessage = 'Sunucu hatasi olustu. Daha sonra tekrar deneyin.';
-            break;
-          default:
-            errorMessage = e.response?.data?['message'] as String? ??
-                'Islemler yuklenemedi.';
-        }
-      } else if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
-        errorMessage = 'Baglanti zaman asimina ugradi.';
-      } else if (e.type == DioExceptionType.connectionError) {
-        errorMessage = 'Internet baglantinizi kontrol edin.';
-      } else {
-        errorMessage = 'Baglanti hatasi olustu.';
-      }
-
-      return {
-        'success': false,
-        'error': errorMessage,
-      };
-    } catch (_) {
-      return {
-        'success': false,
-        'error': 'Beklenmeyen bir hata olustu.',
-      };
+      throw _handleError(e);
     }
   }
+
+  /// Tek bir transaction getir
+  Future<TransactionModel> getTransactionById(String id) async {
+    try {
+      final response = await _dio.get('/transactions/$id');
+      return TransactionModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Yeni transaction oluştur
+  Future<TransactionModel> createTransaction({
+    required double amount,
+    required String type,
+    required String categoryId,
+    required String date,
+    String? description,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/transactions',
+        data: {
+          'amount': amount,
+          'type': type,
+          'category_id': categoryId,
+          'date': date,
+          if (description != null) 'description': description,
+        },
+      );
+      return TransactionModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Transaction güncelle
+  Future<TransactionModel> updateTransaction({
+    required String id,
+    double? amount,
+    String? categoryId,
+    String? description,
+    String? date,
+  }) async {
+    try {
+      final data = <String, dynamic>{};
+      if (amount != null) data['amount'] = amount;
+      if (categoryId != null) data['category_id'] = categoryId;
+      if (description != null) data['description'] = description;
+      if (date != null) data['date'] = date;
+
+      final response = await _dio.put('/transactions/$id', data: data);
+      return TransactionModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Transaction sil
+  Future<void> deleteTransaction(String id) async {
+    try {
+      await _dio.delete('/transactions/$id');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Exception _handleError(DioException e) {
+    if (e.response != null) {
+      final statusCode = e.response!.statusCode;
+      final data = e.response!.data;
+      
+      String message = 'Bir hata oluştu';
+      if (data is Map<String, dynamic> && data.containsKey('message')) {
+        message = data['message'] as String;
+      }
+
+      switch (statusCode) {
+        case 400:
+          return TransactionException('Geçersiz istek: $message');
+        case 401:
+          return TransactionException('Oturum süresi doldu');
+        case 403:
+          return TransactionException('Bu işleme erişim izniniz yok');
+        case 404:
+          return TransactionException('İşlem bulunamadı');
+        case 500:
+          return TransactionException('Sunucu hatası');
+        default:
+          return TransactionException(message);
+      }
+    }
+    
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return TransactionException('Bağlantı zaman aşımına uğradı');
+    }
+    
+    if (e.type == DioExceptionType.connectionError) {
+      return TransactionException('İnternet bağlantısı yok');
+    }
+
+    return TransactionException('Beklenmeyen bir hata oluştu');
+  }
+}
+
+/// Transaction Exception
+class TransactionException implements Exception {
+  final String message;
+  TransactionException(this.message);
+  
+  @override
+  String toString() => message;
 }

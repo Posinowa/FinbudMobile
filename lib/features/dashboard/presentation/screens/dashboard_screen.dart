@@ -1,4 +1,5 @@
-﻿import '../../../../core/router/app_router.dart';
+
+import '../../../../core/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,33 +26,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(dashboardProvider.notifier).loadDashboard();
     });
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Cikis Yap'),
-        content: const Text('Hesabinizdan cikis yapmak istediginize emin misiniz?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Iptal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await AppRouter.logout();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.expense,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Cikis Yap'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -148,10 +122,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
     );
   }
+
+  // LOGOUT DIALOG - DOGRU YER BURASI
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cikis Yap'),
+        content: const Text('Hesabinizdan cikis yapmak istediginize emin misiniz?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Iptal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await AppRouter.logout();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.expense,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Cikis Yap'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SectionTitle extends StatelessWidget {
   final String text;
+
   const _SectionTitle(this.text);
 
   @override
@@ -189,7 +192,10 @@ class _DashboardErrorBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
             TextButton(

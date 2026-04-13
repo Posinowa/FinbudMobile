@@ -1,12 +1,13 @@
+// lib/features/transaction/presentation/screens/transaction_list_screen.dart
+
+import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/app_color.dart';
-import '../../data/models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/transaction_state.dart';
+import '../widgets/transaction_item.dart';
 import '../widgets/transaction_empty_state.dart';
 import '../widgets/transaction_filter_sheet.dart';
-import '../widgets/transaction_item.dart';
 import '../widgets/transaction_shimmer.dart';
 
 class TransactionScreen extends ConsumerStatefulWidget {
@@ -17,284 +18,345 @@ class TransactionScreen extends ConsumerStatefulWidget {
 }
 
 class _TransactionScreenState extends ConsumerState<TransactionScreen> {
-  late final ScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController()..addListener(_onScroll);
+    _scrollController.addListener(_onScroll);
+    
+    // İlk yükleme
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(transactionProvider.notifier).loadInitial();
+      ref.read(transactionProvider.notifier).refresh();
     });
   }
 
   @override
   void dispose() {
-    _scrollController
-      ..removeListener(_onScroll)
-      ..dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients) return;
-    final position = _scrollController.position;
-    if (position.pixels >= position.maxScrollExtent - 220) {
+    if (_isNearBottom) {
       ref.read(transactionProvider.notifier).loadMore();
     }
   }
 
-  Future<void> _openFilterSheet() async {
-    final selectedType = ref.read(selectedTransactionTypeProvider);
-    final selectedMonth = ref.read(selectedTransactionMonthProvider);
+  bool get _isNearBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll - 200);
+  }
 
-    final result = await TransactionFilterSheet.show(
-      context,
-      selectedType: selectedType,
-      selectedMonth: selectedMonth,
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const TransactionFilterSheet(),
     );
-
-    if (result == null) return;
-
-    await ref.read(transactionProvider.notifier).updateFilters(
-          type: result.type,
-          month: result.month,
-        );
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(transactionProvider);
-    final selectedType = ref.watch(selectedTransactionTypeProvider);
-    final selectedMonth = ref.watch(selectedTransactionMonthProvider);
-    final hasFilters = selectedType != null || selectedMonth != null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Islemler'),
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _openFilterSheet,
-            icon: const Icon(Icons.filter_list_rounded),
-            tooltip: 'Filtrele',
-          ),
-        ],
-        bottom: state.isInitialLoading
-            ? const PreferredSize(
-                preferredSize: Size.fromHeight(2),
-                child: LinearProgressIndicator(minHeight: 2),
-              )
-            : null,
-      ),
-      body: Column(
-        children: [
-          if (hasFilters)
-            _ActiveFilterBar(
-              selectedType: selectedType,
-              selectedMonth: selectedMonth,
-              onClearAll: () =>
-                  ref.read(transactionProvider.notifier).clearFilters(),
-            ),
-          Expanded(
-            child: _buildBody(state, hasFilters),
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(state),
+      body: _buildBody(state),
     );
   }
 
-  Widget _buildBody(TransactionState state, bool hasFilters) {
-    if (state.isInitialLoading && state.transactions.isEmpty) {
-      return const TransactionShimmer();
-    }
-
-    if (state.hasError && state.transactions.isEmpty) {
-      return _InitialErrorView(
-        message: state.errorMessage ?? 'Islemler yuklenemedi.',
-        onRetry: () => ref.read(transactionProvider.notifier).retryInitial(),
-      );
-    }
-
-    if (state.isEmpty) {
-      return TransactionEmptyState(
-        hasFilters: hasFilters,
-        onClearFilters: hasFilters
-            ? () => ref.read(transactionProvider.notifier).clearFilters()
-            : null,
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () => ref.read(transactionProvider.notifier).refresh(),
-      child: ListView.separated(
-        controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        itemCount: state.transactions.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (context, index) {
-          if (index == state.transactions.length) {
-            if (state.isLoadingMore) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Center(child: CircularProgressIndicator(strokeWidth: 2.2)),
-              );
-            }
-            if (state.hasLoadMoreError) {
-              return _LoadMoreErrorRow(
-                message: state.loadMoreError ?? 'Daha fazla veri yuklenemedi.',
-                onRetry: () => ref.read(transactionProvider.notifier).retryLoadMore(),
-              );
-            }
-            return const SizedBox.shrink();
-          }
-          return TransactionListItem(transaction: state.transactions[index]);
-        },
-      ),
-    );
-  }
-}
-
-class _ActiveFilterBar extends StatelessWidget {
-  final TransactionType? selectedType;
-  final String? selectedMonth;
-  final VoidCallback onClearAll;
-
-  const _ActiveFilterBar({
-    required this.selectedType,
-    required this.selectedMonth,
-    required this.onClearAll,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          bottom: BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
+  PreferredSizeWidget _buildAppBar(TransactionState state) {
+    return AppBar(
+      title: const Text(
+        'İşlemler',
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 20,
         ),
       ),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          if (selectedType != null)
-            Chip(
-              label: Text(selectedType == TransactionType.income ? 'Gelir' : 'Gider'),
-              backgroundColor: (selectedType == TransactionType.income
-                      ? AppColors.income
-                      : AppColors.expense)
-                  .withValues(alpha: 0.14),
-              side: BorderSide.none,
-              labelStyle: TextStyle(
-                color: selectedType == TransactionType.income
-                    ? AppColors.income
-                    : AppColors.expense,
-                fontWeight: FontWeight.w600,
-              ),
+      backgroundColor: AppColors.surface,
+      foregroundColor: AppColors.textPrimary,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      actions: [
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.filter_list_rounded),
+              onPressed: _showFilterSheet,
+              tooltip: 'Filtrele',
             ),
-          if (selectedMonth != null)
-            Chip(
-              label: Text(selectedMonth!),
-              backgroundColor: AppColors.primary.withValues(alpha: 0.14),
-              side: BorderSide.none,
-              labelStyle: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
+            if (state.hasActiveFilters)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
-            ),
-          ActionChip(
-            label: const Text('Temizle'),
-            onPressed: onClearAll,
-            avatar: const Icon(Icons.clear, size: 16),
-            backgroundColor: AppColors.background,
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
+      bottom: state.hasActiveFilters ? _buildFilterChips(state) : null,
     );
   }
-}
 
-class _InitialErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _InitialErrorView({
-    required this.message,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+  PreferredSize _buildFilterChips(TransactionState state) {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(56),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
           children: [
-            const Icon(Icons.error_outline, color: AppColors.error, size: 42),
-            const SizedBox(height: 10),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: onRetry,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.textOnPrimary,
+            // Tip filtresi chip
+            if (state.filter.type != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _buildFilterChip(
+                  label: state.filter.type == 'income' ? 'Gelir' : 'Gider',
+                  color: state.filter.type == 'income' 
+                      ? AppColors.income 
+                      : AppColors.expense,
+                  onRemove: () => ref.read(transactionProvider.notifier).setTypeFilter(null),
+                ),
               ),
-              child: const Text('Tekrar dene'),
+            
+            // Ay filtresi chip
+            if (state.filter.month != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _buildFilterChip(
+                  label: _formatMonth(state.filter.month!),
+                  color: AppColors.primary,
+                  onRemove: () => ref.read(transactionProvider.notifier).setMonthFilter(null),
+                ),
+              ),
+
+            // Tümünü temizle
+            Center(
+              child: TextButton(
+                onPressed: () => ref.read(transactionProvider.notifier).clearFilters(),
+                child: const Text(
+                  'Temizle',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class _LoadMoreErrorRow extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _LoadMoreErrorRow({
-    required this.message,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.dangerLight,
-        borderRadius: BorderRadius.circular(10),
+  Widget _buildFilterChip({
+    required String label,
+    required Color color,
+    required VoidCallback onRemove,
+  }) {
+    return Center(
+      child: Chip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: color.withOpacity(0.1),
+        deleteIcon: Icon(Icons.close, size: 18, color: color),
+        onDeleted: onRemove,
+        side: BorderSide(color: color.withOpacity(0.3)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+    );
+  }
+
+  Widget _buildBody(TransactionState state) {
+    // İlk yükleme
+    if (state.isLoading && state.transactions.isEmpty) {
+      return const TransactionShimmer();
+    }
+
+    // Hata durumu
+    if (state.hasError && state.transactions.isEmpty) {
+      return _buildErrorState(state);
+    }
+
+    // Boş durum
+    if (state.isEmpty) {
+      return TransactionEmptyState(
+        hasFilters: state.hasActiveFilters,
+        onClearFilters: () => ref.read(transactionProvider.notifier).clearFilters(),
+      );
+    }
+
+    // Liste
+    return RefreshIndicator(
+      onRefresh: () => ref.read(transactionProvider.notifier).refresh(),
+      color: AppColors.primary,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: state.transactions.length + (state.hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == state.transactions.length) {
+            return _buildLoadingIndicator(state);
+          }
+
+          final transaction = state.transactions[index];
+          return TransactionItem(
+            transaction: transaction,
+            onTap: () => _onTransactionTap(transaction),
+            onDelete: () => _onDeleteTransaction(transaction),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildErrorState(TransactionState state) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.dangerLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 40,
+                color: AppColors.danger,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Bir hata oluştu',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.errorMessage ?? 'Bilinmeyen hata',
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => ref.read(transactionProvider.notifier).refresh(),
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Tekrar Dene'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textOnPrimary,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator(TransactionState state) {
+    if (state.isLoadingMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primary,
             ),
           ),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  void _onTransactionTap(transaction) {
+    // TODO: Transaction detay sayfasına git
+  }
+
+  Future<void> _onDeleteTransaction(transaction) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('İşlemi Sil'),
+        content: const Text('Bu işlemi silmek istediğinize emin misiniz?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
           TextButton(
-            onPressed: onRetry,
-            child: const Text('Yeniden dene'),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sil', style: TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
     );
+
+    if (confirmed == true && mounted) {
+      final success = await ref.read(transactionProvider.notifier).deleteTransaction(transaction.id);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('İşlem silindi'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
+  String _formatMonth(String month) {
+    final parts = month.split('-');
+    if (parts.length != 2) return month;
+    
+    final year = parts[0];
+    final monthNum = int.tryParse(parts[1]) ?? 1;
+    
+    const months = [
+      'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+    ];
+    
+    return '${months[monthNum - 1]} $year';
   }
 }

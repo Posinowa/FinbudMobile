@@ -1,54 +1,75 @@
+// lib/features/transaction/presentation/providers/transaction_state.dart
+
+import 'package:equatable/equatable.dart';
 import '../../data/models/transaction_model.dart';
 
-class TransactionState {
-  final bool isInitialLoading;
-  final bool isLoadingMore;
-  final String? errorMessage;
-  final String? loadMoreError;
+/// Transaction yükleme durumu
+enum TransactionStatus { initial, loading, loaded, loadingMore, error }
+
+/// Transaction state - Immutable state class
+class TransactionState extends Equatable {
   final List<TransactionModel> transactions;
-  final int currentPage;
-  final int limit;
-  final bool hasMore;
+  final TransactionStatus status;
+  final String? errorMessage;
+  final PaginationMeta? meta;
+  final TransactionFilter filter;
 
   const TransactionState({
-    this.isInitialLoading = false,
-    this.isLoadingMore = false,
-    this.errorMessage,
-    this.loadMoreError,
     this.transactions = const [],
-    this.currentPage = 1,
-    this.limit = 20,
-    this.hasMore = true,
+    this.status = TransactionStatus.initial,
+    this.errorMessage,
+    this.meta,
+    this.filter = const TransactionFilter(),
   });
 
+  /// Liste boş mu?
+  bool get isEmpty => status == TransactionStatus.loaded && transactions.isEmpty;
+
+  /// Yükleniyor mu?
+  bool get isLoading => status == TransactionStatus.loading;
+
+  /// Daha fazla yükleniyor mu?
+  bool get isLoadingMore => status == TransactionStatus.loadingMore;
+
+  /// Hata var mı?
+  bool get hasError => status == TransactionStatus.error;
+
+  /// Daha fazla sayfa var mı?
+  bool get hasMore => meta?.hasMore ?? true;
+
+  /// Aktif filtre var mı?
+  bool get hasActiveFilters => filter.hasActiveFilters;
+
+  /// Toplam gelir
+  double get totalIncome => transactions
+      .where((t) => t.isIncome)
+      .fold(0.0, (sum, t) => sum + t.amount);
+
+  /// Toplam gider
+  double get totalExpense => transactions
+      .where((t) => t.isExpense)
+      .fold(0.0, (sum, t) => sum + t.amount);
+
+  /// Net bakiye
+  double get netBalance => totalIncome - totalExpense;
+
   TransactionState copyWith({
-    bool? isInitialLoading,
-    bool? isLoadingMore,
-    String? errorMessage,
-    String? loadMoreError,
     List<TransactionModel>? transactions,
-    int? currentPage,
-    int? limit,
-    bool? hasMore,
+    TransactionStatus? status,
+    String? errorMessage,
+    PaginationMeta? meta,
+    TransactionFilter? filter,
     bool clearError = false,
-    bool clearLoadMoreError = false,
   }) {
     return TransactionState(
-      isInitialLoading: isInitialLoading ?? this.isInitialLoading,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      loadMoreError: clearLoadMoreError
-          ? null
-          : (loadMoreError ?? this.loadMoreError),
       transactions: transactions ?? this.transactions,
-      currentPage: currentPage ?? this.currentPage,
-      limit: limit ?? this.limit,
-      hasMore: hasMore ?? this.hasMore,
+      status: status ?? this.status,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      meta: meta ?? this.meta,
+      filter: filter ?? this.filter,
     );
   }
 
-  bool get hasError => errorMessage != null && errorMessage!.isNotEmpty;
-  bool get hasLoadMoreError =>
-      loadMoreError != null && loadMoreError!.isNotEmpty;
-  bool get isEmpty => !isInitialLoading && transactions.isEmpty && !hasError;
+  @override
+  List<Object?> get props => [transactions, status, errorMessage, meta, filter];
 }
