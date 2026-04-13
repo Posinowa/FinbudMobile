@@ -8,12 +8,14 @@ import '../../data/models/transaction_model.dart';
 class TransactionItem extends StatelessWidget {
   final TransactionModel transaction;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
   const TransactionItem({
     super.key,
     required this.transaction,
     this.onTap,
+    this.onEdit,
     this.onDelete,
   });
 
@@ -22,7 +24,8 @@ class TransactionItem extends StatelessWidget {
     // Renk kodlaması: Gelir = Yeşil (income), Gider = Kırmızı (expense)
     final isIncome = transaction.isIncome;
     final color = isIncome ? AppColors.income : AppColors.expense;
-    final backgroundColor = isIncome ? AppColors.successLight : AppColors.dangerLight;
+    final backgroundColor =
+        isIncome ? AppColors.successLight : AppColors.dangerLight;
     final sign = isIncome ? '+' : '-';
 
     // Tarih formatı
@@ -67,6 +70,7 @@ class TransactionItem extends StatelessWidget {
               ),
             ],
           ),
+          // build metodu içinde Row'u güncelleyin:
           child: Row(
             children: [
               // Sol: İkon
@@ -76,8 +80,15 @@ class TransactionItem extends StatelessWidget {
               // Orta: Açıklama ve tarih
               Expanded(child: _buildContent(formattedDate)),
 
-              // Sağ: Tutar
-              _buildAmount(sign, color),
+              // Sağ: Tutar ve düzenleme
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildAmount(sign, color),
+                  const SizedBox(width: 8),
+                  _buildEditButton(), // YENİ
+                ],
+              ),
             ],
           ),
         ),
@@ -106,9 +117,10 @@ class TransactionItem extends StatelessWidget {
   }
 
   Widget _buildContent(String formattedDate) {
-    final title = transaction.description?.isNotEmpty == true
-        ? transaction.description!
-        : transaction.category.name;
+    final title =
+        transaction.description?.isNotEmpty == true
+            ? transaction.description!
+            : transaction.category.name;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,13 +139,19 @@ class TransactionItem extends StatelessWidget {
         Row(
           children: [
             if (transaction.category.icon != null) ...[
-              Text(transaction.category.icon!, style: const TextStyle(fontSize: 12)),
+              Text(
+                transaction.category.icon!,
+                style: const TextStyle(fontSize: 12),
+              ),
               const SizedBox(width: 4),
             ],
             Flexible(
               child: Text(
                 transaction.category.name,
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -150,7 +168,10 @@ class TransactionItem extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               formattedDate,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -194,6 +215,25 @@ class TransactionItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEditButton() {
+    return GestureDetector(
+      onTap: onEdit,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Icon(
+          Icons.edit_outlined,
+          size: 18,
+          color: AppColors.primary,
+        ),
+      ),
     );
   }
 }

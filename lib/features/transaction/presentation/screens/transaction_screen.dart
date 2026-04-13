@@ -1,6 +1,8 @@
 // lib/features/transaction/presentation/screens/transaction_list_screen.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/features/transaction/data/models/transaction_model.dart';
+import 'package:finbud_app/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/transaction_provider.dart';
@@ -224,6 +226,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
           return TransactionItem(
             transaction: transaction,
             onTap: () => _onTransactionTap(transaction),
+            onEdit: () => _showEditTransactionSheet(transaction),
             onDelete: () => _onDeleteTransaction(transaction),
           );
         },
@@ -306,9 +309,18 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
     return const SizedBox.shrink();
   }
 
-  void _onTransactionTap(transaction) {
-    // TODO: Transaction detay sayfasına git
-  }
+  void _onTransactionTap(TransactionModel transaction) {
+  _showEditTransactionSheet(transaction);
+}
+
+void _showEditTransactionSheet(TransactionModel transaction) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => AddTransactionSheet(transaction: transaction),
+  );
+}
 
   Future<void> _onDeleteTransaction(transaction) async {
     final confirmed = await showDialog<bool>(

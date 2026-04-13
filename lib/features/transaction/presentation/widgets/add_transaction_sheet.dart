@@ -3,6 +3,7 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
+import 'package:finbud_app/features/transaction/data/models/transaction_model.dart';
 import 'package:finbud_app/features/transaction/presentation/providers/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,10 +11,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class AddTransactionSheet extends ConsumerStatefulWidget {
-  const AddTransactionSheet({super.key});
+  final TransactionModel? transaction;
+  const AddTransactionSheet({super.key, this.transaction});
+
+  bool get isEditMode => transaction != null;
 
   @override
-  ConsumerState<AddTransactionSheet> createState() => _AddTransactionSheetState();
+  ConsumerState<AddTransactionSheet> createState() =>
+      _AddTransactionSheetState();
 }
 
 class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
@@ -29,10 +34,40 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   @override
   void initState() {
     super.initState();
+
+    // Düzenleme modunda mevcut verileri doldur
+    if (widget.transaction != null) {
+      final t = widget.transaction!;
+      _amountController.text = t.amount.toString();
+      _descriptionController.text = t.description ?? '';
+      _selectedType = t.type == TransactionType.income ? 'income' : 'expense';
+      _selectedDate = t.dateTime;
+    }
+
     // Kategorileri yükle
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(categoryProvider.notifier).loadCategories();
+
+      // Düzenleme modunda kategoriyi seç
+      if (widget.transaction != null) {
+        _selectCategoryFromTransaction();
+      }
     });
+  }
+
+  void _selectCategoryFromTransaction() {
+    final categoryState = ref.read(categoryProvider);
+    final transaction = widget.transaction;
+
+    if (transaction != null && categoryState.categories.isNotEmpty) {
+      final matchingCategory = categoryState.categories.firstWhere(
+        (c) => c.id == transaction.category.id,
+        orElse: () => categoryState.categories.first,
+      );
+      setState(() {
+        _selectedCategory = matchingCategory;
+      });
+    }
   }
 
   @override
@@ -82,9 +117,11 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Yeni İşlem Ekle',
-                        style: TextStyle(
+                      Text(
+                        widget.isEditMode
+                            ? 'İşlemi Düzenle'
+                            : 'Yeni İşlem Ekle',
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -92,7 +129,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                        icon: const Icon(
+                          Icons.close,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -131,43 +171,72 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   }
 
   Widget _buildTypeSelector() {
+    // Düzenleme modunda tip değiştirilemez
+    final isDisabled = widget.isEditMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'İşlem Tipi',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(4),
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildTypeButton(
-                  label: 'Gider',
-                  icon: Icons.arrow_downward_rounded,
-                  value: 'expense',
-                  color: AppColors.expense,
-                ),
+        Row(
+          children: [
+            const Text(
+              'İşlem Tipi',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
               ),
-              Expanded(
-                child: _buildTypeButton(
-                  label: 'Gelir',
-                  icon: Icons.arrow_upward_rounded,
-                  value: 'income',
-                  color: AppColors.income,
+            ),
+            if (isDisabled) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.textHint.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'Değiştirilemez',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        IgnorePointer(
+          ignoring: isDisabled,
+          child: Opacity(
+            opacity: isDisabled ? 0.6 : 1.0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildTypeButton(
+                      label: 'Gider',
+                      icon: Icons.arrow_downward_rounded,
+                      value: 'expense',
+                      color: AppColors.expense,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildTypeButton(
+                      label: 'Gelir',
+                      icon: Icons.arrow_upward_rounded,
+                      value: 'income',
+                      color: AppColors.income,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -271,7 +340,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.danger),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -289,9 +361,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   }
 
   Widget _buildCategoryDropdown(CategoryState categoryState) {
-    final categories = _selectedType == 'income'
-        ? categoryState.incomeCategories
-        : categoryState.expenseCategories;
+    final categories =
+        _selectedType == 'income'
+            ? categoryState.incomeCategories
+            : categoryState.expenseCategories;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,40 +396,45 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.danger),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
           hint: Text(
             categoryState.isLoading ? 'Yükleniyor...' : 'Kategori seçin',
             style: const TextStyle(color: AppColors.textHint),
           ),
-          items: categories.map((category) {
-            return DropdownMenuItem<CategoryModel>(
-              value: category,
-              child: Row(
-                children: [
-                  Text(
-                    category.icon ?? '📁',
-                    style: const TextStyle(fontSize: 18),
+          items:
+              categories.map((category) {
+                return DropdownMenuItem<CategoryModel>(
+                  value: category,
+                  child: Row(
+                    children: [
+                      Text(
+                        category.icon ?? '📁',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        category.name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    category.name,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: categoryState.isLoading
-              ? null
-              : (value) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                },
+                );
+              }).toList(),
+          onChanged:
+              categoryState.isLoading
+                  ? null
+                  : (value) {
+                    setState(() {
+                      _selectedCategory = value;
+                    });
+                  },
           validator: (value) {
             if (value == null) {
               return 'Kategori seçin';
@@ -419,32 +497,32 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   }
 
   Future<void> _pickDate() async {
-  final picked = await showDatePicker(
-    context: context,
-    initialDate: _selectedDate,
-    firstDate: DateTime(2020),
-    lastDate: DateTime.now().add(const Duration(days: 365)),
-    builder: (context, child) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: AppColors.primary,
-            onPrimary: AppColors.textOnPrimary,
-            surface: AppColors.surface,
-            onSurface: AppColors.textPrimary,
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.textOnPrimary,
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
           ),
-        ),
-        child: child!,
-      );
-    },
-  );
+          child: child!,
+        );
+      },
+    );
 
-  if (picked != null) {
-    setState(() {
-      _selectedDate = picked;
-    });
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
-}
 
   Widget _buildDescriptionField() {
     return Column(
@@ -463,10 +541,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
           controller: _descriptionController,
           maxLines: 2,
           maxLength: 200,
-          style: const TextStyle(
-            fontSize: 15,
-            color: AppColors.textPrimary,
-          ),
+          style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: 'İşlem hakkında not ekleyin...',
             hintStyle: const TextStyle(color: AppColors.textHint),
@@ -480,7 +555,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             counterStyle: const TextStyle(color: AppColors.textHint),
           ),
         ),
@@ -489,15 +567,23 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   }
 
   Widget _buildSubmitButton() {
+    final buttonText =
+        widget.isEditMode
+            ? 'Güncelle'
+            : (_selectedType == 'income' ? 'Gelir Ekle' : 'Gider Ekle');
+
     return SizedBox(
       width: double.infinity,
       height: 54,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _submitForm,
         style: ElevatedButton.styleFrom(
-          backgroundColor: _selectedType == 'income' 
-              ? AppColors.income 
-              : AppColors.expense,
+          backgroundColor:
+              widget.isEditMode
+                  ? AppColors.primary
+                  : (_selectedType == 'income'
+                      ? AppColors.income
+                      : AppColors.expense),
           foregroundColor: Colors.white,
           disabledBackgroundColor: AppColors.border,
           elevation: 0,
@@ -505,22 +591,23 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
+        child:
+            _isLoading
+                ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                : Text(
+                  buttonText,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              )
-            : Text(
-                _selectedType == 'income' ? 'Gelir Ekle' : 'Gider Ekle',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
       ),
     );
   }
@@ -535,17 +622,36 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     try {
       final amount = double.parse(_amountController.text);
       final date = DateFormat('yyyy-MM-dd').format(_selectedDate);
-      final description = _descriptionController.text.isNotEmpty
-          ? _descriptionController.text
-          : null;
+      final description =
+          _descriptionController.text.isNotEmpty
+              ? _descriptionController.text
+              : null;
 
-      final success = await ref.read(transactionProvider.notifier).createTransaction(
-        amount: amount,
-        type: _selectedType,
-        categoryId: _selectedCategory!.id,
-        date: date,
-        description: description,
-      );
+      bool success;
+
+      if (widget.isEditMode) {
+        // Güncelleme modu
+        success = await ref
+            .read(transactionProvider.notifier)
+            .updateTransaction(
+              id: widget.transaction!.id,
+              amount: amount,
+              categoryId: _selectedCategory!.id,
+              date: date,
+              description: description,
+            );
+      } else {
+        // Yeni ekleme modu
+        success = await ref
+            .read(transactionProvider.notifier)
+            .createTransaction(
+              amount: amount,
+              type: _selectedType,
+              categoryId: _selectedCategory!.id,
+              date: date,
+              description: description,
+            );
+      }
 
       if (mounted) {
         if (success) {
@@ -553,22 +659,32 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                _selectedType == 'income' 
-                    ? 'Gelir başarıyla eklendi' 
-                    : 'Gider başarıyla eklendi',
+                widget.isEditMode
+                    ? 'İşlem başarıyla güncellendi'
+                    : (_selectedType == 'income'
+                        ? 'Gelir başarıyla eklendi'
+                        : 'Gider başarıyla eklendi'),
               ),
               backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('İşlem eklenirken bir hata oluştu'),
+              content: Text(
+                widget.isEditMode
+                    ? 'İşlem güncellenirken bir hata oluştu'
+                    : 'İşlem eklenirken bir hata oluştu',
+              ),
               backgroundColor: AppColors.danger,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -580,7 +696,9 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             content: Text('Hata: $e'),
             backgroundColor: AppColors.danger,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }

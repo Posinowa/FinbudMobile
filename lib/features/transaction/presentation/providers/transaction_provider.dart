@@ -565,4 +565,83 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     onTransactionCreated(newTransaction);
     return true;
   }
+
+  /// Transaction güncelle
+  Future<bool> updateTransaction({
+    required String id,
+    double? amount,
+    String? categoryId,
+    String? description,
+    String? date,
+  }) async {
+    if (_useMock) {
+      return _updateTransactionMock(
+        id: id,
+        amount: amount,
+        categoryId: categoryId,
+        description: description,
+        date: date,
+      );
+    }
+    return _updateTransactionApi(
+      id: id,
+      amount: amount,
+      categoryId: categoryId,
+      description: description,
+      date: date,
+    );
+  }
+
+  Future<bool> _updateTransactionApi({
+    required String id,
+    double? amount,
+    String? categoryId,
+    String? description,
+    String? date,
+  }) async {
+    try {
+      final transaction = await _repository!.updateTransaction(
+        id: id,
+        amount: amount,
+        categoryId: categoryId,
+        description: description,
+        date: date,
+      );
+
+      onTransactionUpdated(transaction);
+      return true;
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> _updateTransactionMock({
+    required String id,
+    double? amount,
+    String? categoryId,
+    String? description,
+    String? date,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final index = state.transactions.indexWhere((t) => t.id == id);
+    if (index == -1) return false;
+
+    final existing = state.transactions[index];
+
+    final updatedTransaction = TransactionModel(
+      id: existing.id,
+      amount: amount ?? existing.amount,
+      type: existing.type,
+      date: date ?? existing.date,
+      description: description ?? existing.description,
+      category: existing.category,
+      createdAt: existing.createdAt,
+      updatedAt: DateTime.now(),
+    );
+
+    onTransactionUpdated(updatedTransaction);
+    return true;
+  }
 }
