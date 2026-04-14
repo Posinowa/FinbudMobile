@@ -283,40 +283,27 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     );
   }
 
-  Future<void> _onDeleteBudget(budget) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Bütçeyi Sil'),
-        content: Text('${budget.category.name} bütçesini silmek istediğinize emin misiniz?'),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sil', style: TextStyle(color: AppColors.danger)),
-          ),
-        ],
+  Future<void> _onDeleteBudget(BudgetModel budget) async {
+  // Swipe'dan geliyorsa dialog zaten BudgetCard'da gösterildi
+  // Burada sadece API çağrısı ve feedback ver
+  final success = await ref.read(budgetProvider.notifier).deleteBudget(budget.id);
+  
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success ? 'Bütçe silindi' : 'Bütçe silinemedi'),
+        backgroundColor: success ? AppColors.success : AppColors.danger,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: success ? null : SnackBarAction(
+          label: 'Tekrar Dene',
+          textColor: Colors.white,
+          onPressed: () => _onDeleteBudget(budget),
+        ),
       ),
     );
-
-    if (confirmed == true && mounted) {
-      final success = await ref.read(budgetProvider.notifier).deleteBudget(budget.id);
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Bütçe silindi'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
-      }
-    }
   }
+}
 
 
   void _navigateToAddBudget() {

@@ -31,35 +31,47 @@ class BudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
+    return Dismissible(
+      key: Key(budget.id),
+      direction: DismissDirection.endToStart, // Sağdan sola swipe
+      background: _buildDismissBackground(),
+      confirmDismiss: (direction) async {
+        // Onay dialog'u göster
+        return await _showDeleteConfirmation(context);
+      },
+      onDismissed: (direction) {
+        onDelete?.call();
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 16),
-                _buildProgressBar(),
-                const SizedBox(height: 12),
-                _buildAmounts(),
-              ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 16),
+                  _buildProgressBar(),
+                  const SizedBox(height: 12),
+                  _buildAmounts(),
+                ],
+              ),
             ),
           ),
         ),
@@ -135,11 +147,7 @@ class BudgetCard extends StatelessWidget {
           if (budget.isOverBudget)
             Padding(
               padding: const EdgeInsets.only(right: 4),
-              child: Icon(
-                Icons.warning_amber_rounded,
-                size: 14,
-                color: color,
-              ),
+              child: Icon(Icons.warning_amber_rounded, size: 14, color: color),
             ),
           Text(
             '%${_percentFormat.format(percent.clamp(0, 999))}',
@@ -179,11 +187,12 @@ class BudgetCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(4),
-                  gradient: budget.isOverBudget
-                      ? LinearGradient(
-                          colors: [color, color.withOpacity(0.7)],
-                        )
-                      : null,
+                  gradient:
+                      budget.isOverBudget
+                          ? LinearGradient(
+                            colors: [color, color.withOpacity(0.7)],
+                          )
+                          : null,
                 ),
               ),
             ),
@@ -206,11 +215,7 @@ class BudgetCard extends StatelessWidget {
         ),
 
         // Ayırıcı
-        Container(
-          width: 1,
-          height: 32,
-          color: AppColors.divider,
-        ),
+        Container(width: 1, height: 32, color: AppColors.divider),
 
         // Kalan
         Expanded(
@@ -240,10 +245,7 @@ class BudgetCard extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 4),
         Text(
@@ -267,5 +269,67 @@ class BudgetCard extends StatelessWidget {
     } else {
       return AppColors.success; // Yeşil - %0-79
     }
+  }
+
+  /// Swipe arka planı (silme ikonu)
+  Widget _buildDismissBackground() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.danger,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.delete_outline_rounded, color: Colors.white, size: 28),
+          SizedBox(height: 4),
+          Text(
+            'Sil',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Silme onay dialog'u
+  Future<bool> _showDeleteConfirmation(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Bütçeyi Sil'),
+                content: Text(
+                  '${budget.category.name} bütçesini silmek istediğinize emin misiniz?',
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text(
+                      'İptal',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text(
+                      'Sil',
+                      style: TextStyle(color: AppColors.danger),
+                    ),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
   }
 }
