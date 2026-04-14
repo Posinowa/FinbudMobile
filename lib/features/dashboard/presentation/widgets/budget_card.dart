@@ -30,15 +30,16 @@ class BudgetCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  _getCategoryIcon(),
-                  color: AppColors.primary,
-                  size: 18,
+                alignment: Alignment.center,
+                child: Text(
+                  budget.categoryIcon ?? '📦',
+                  style: const TextStyle(fontSize: 20),
                 ),
               ),
               const SizedBox(width: 12),
