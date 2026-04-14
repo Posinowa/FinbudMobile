@@ -36,9 +36,14 @@ class TransactionItem extends StatelessWidget {
       key: Key(transaction.id),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
-        onDelete?.call();
+        if (onDelete != null) {
+          onDelete!();
+        }
+        // false döndürerek Dismissible'ın otomatik silmesini engelliyoruz
+        // Silme işlemi onDelete callback'i içinde provider üzerinden yapılıyor
         return false;
       },
+
       background: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
