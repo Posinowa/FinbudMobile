@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../domain/models/dashboard_summary.dart';
+import '../../../budget/presentation/providers/budget_provider.dart';
+import '../../../budget/presentation/providers/budget_state.dart';
+import '../../../transaction/presentation/providers/transaction_provider.dart';
+import '../../../transaction/presentation/providers/transaction_state.dart';
 
 // Repository provider
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
@@ -100,7 +104,29 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
 final dashboardProvider =
     StateNotifierProvider<DashboardNotifier, DashboardState>((ref) {
   final repository = ref.watch(dashboardRepositoryProvider);
-  return DashboardNotifier(repository, ref);
+  final notifier = DashboardNotifier(repository, ref);
+
+  // Transaction eklenince/silinince/güncellenince dashboard'u otomatik yenile
+  ref.listen<TransactionState>(transactionProvider, (previous, next) {
+    if (previous != null &&
+        previous.isLoading &&
+        next.status == TransactionStatus.loaded &&
+        !notifier.state.isLoading) {
+      notifier.refresh();
+    }
+  });
+
+  // Budget eklenince/silinince/güncellenince dashboard'u otomatik yenile
+  ref.listen<BudgetState>(budgetProvider, (previous, next) {
+    if (previous != null &&
+        previous.isLoading &&
+        next.isLoaded &&
+        !notifier.state.isLoading) {
+      notifier.refresh();
+    }
+  });
+
+  return notifier;
 });
 
 // Convenience providers

@@ -44,7 +44,7 @@ class IncomeExpenseChart extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           SizedBox(
-            height: 160,
+            height: 185,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,

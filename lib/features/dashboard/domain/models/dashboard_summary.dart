@@ -20,7 +20,6 @@ class DashboardSummary {
     this.recentTransactions = const [],
   });
 
-  /// Backend henüz veri döndürmediğinde veya yükleme sırasında gösterilecek boş özet.
   factory DashboardSummary.empty({required String month}) {
     return DashboardSummary(
       balance: 0,
@@ -38,7 +37,8 @@ class DashboardSummary {
       totalIncome: (json['total_income'] as num?)?.toDouble() ?? 0.0,
       totalExpense: (json['total_expense'] as num?)?.toDouble() ?? 0.0,
       month: json['month'] as String? ?? '',
-      budgets: (json['budgets'] as List<dynamic>?)
+      // Backend "budget_summary" key'i ile gönderiyor
+      budgets: (json['budget_summary'] as List<dynamic>?)
               ?.map((e) => BudgetSummary.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -51,15 +51,16 @@ class DashboardSummary {
 }
 
 /// Bütçe özeti modeli
+/// Backend: { id, category:{id,name,icon,type}, limit, spent, remaining, percent_used }
 @immutable
 class BudgetSummary {
-  final int id;
+  final String id;         // UUID string
   final String categoryName;
   final String? categoryIcon;
-  final double allocatedAmount;
-  final double usedAmount;
-  final double remainingAmount;
-  final double usagePercentage;
+  final double allocatedAmount;  // backend: "limit"
+  final double usedAmount;       // backend: "spent"
+  final double remainingAmount;  // backend: "remaining"
+  final double usagePercentage;  // backend: "percent_used"
 
   const BudgetSummary({
     required this.id,
@@ -72,19 +73,23 @@ class BudgetSummary {
   });
 
   factory BudgetSummary.fromJson(Map<String, dynamic> json) {
-    final allocated = (json['allocated_amount'] as num?)?.toDouble() ?? 0.0;
-    final used = (json['used_amount'] as num?)?.toDouble() ?? 0.0;
-    final remaining = (json['remaining_amount'] as num?)?.toDouble() ?? (allocated - used);
-    final percentage = allocated > 0 ? (used / allocated) * 100 : 0.0;
+    // Nested category objesi
+    final category = json['category'] as Map<String, dynamic>? ?? {};
+
+    final allocated = (json['limit'] as num?)?.toDouble() ?? 0.0;
+    final used = (json['spent'] as num?)?.toDouble() ?? 0.0;
+    final remaining = (json['remaining'] as num?)?.toDouble() ?? (allocated - used);
+    final percentage = (json['percent_used'] as num?)?.toDouble() ??
+        (allocated > 0 ? (used / allocated) * 100 : 0.0);
 
     return BudgetSummary(
-      id: json['id'] as int? ?? 0,
-      categoryName: json['category_name'] as String? ?? 'Diğer',
-      categoryIcon: json['category_icon'] as String?,
+      id: json['id']?.toString() ?? '',
+      categoryName: category['name'] as String? ?? 'Diğer',
+      categoryIcon: category['icon'] as String?,
       allocatedAmount: allocated,
       usedAmount: used,
       remainingAmount: remaining,
-      usagePercentage: (json['usage_percentage'] as num?)?.toDouble() ?? percentage,
+      usagePercentage: percentage,
     );
   }
 
@@ -93,9 +98,10 @@ class BudgetSummary {
 }
 
 /// Son işlem modeli
+/// Backend: { id, amount, type, category:{id,name,icon,type}, description, date }
 @immutable
 class RecentTransaction {
-  final int id;
+  final String id;         // UUID string
   final String description;
   final String categoryName;
   final String? categoryIcon;
@@ -114,11 +120,15 @@ class RecentTransaction {
   });
 
   factory RecentTransaction.fromJson(Map<String, dynamic> json) {
+    // Nested category objesi
+    final category = json['category'] as Map<String, dynamic>? ?? {};
+
     return RecentTransaction(
-      id: json['id'] as int? ?? 0,
+      id: json['id']?.toString() ?? '',
+      // description backend'de nullable (*string), null gelirse boş string
       description: json['description'] as String? ?? '',
-      categoryName: json['category_name'] as String? ?? 'Diğer',
-      categoryIcon: json['category_icon'] as String?,
+      categoryName: category['name'] as String? ?? 'Diğer',
+      categoryIcon: category['icon'] as String?,
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       date: json['date'] != null
           ? DateTime.parse(json['date'] as String)

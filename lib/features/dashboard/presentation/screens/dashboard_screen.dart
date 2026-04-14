@@ -11,6 +11,10 @@ import '../widgets/income_expense_chart.dart';
 import '../widgets/month_selector.dart';
 import '../widgets/recent_transactions_widget.dart';
 import '../widgets/summary_card.dart';
+import '../../../budget/presentation/providers/budget_provider.dart';
+import '../../../budget/presentation/providers/budget_state.dart';
+import '../../../transaction/presentation/providers/transaction_provider.dart';
+import '../../../transaction/presentation/providers/transaction_state.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -30,9 +34,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Ay değişince yenile
     ref.listen<String>(selectedMonthProvider, (previous, next) {
       if (previous != null && previous != next) {
         ref.read(dashboardProvider.notifier).loadDashboard();
+      }
+    });
+
+    // Transaction eklenince/silinince/güncellenince dashboard'u yenile
+    ref.listen<TransactionState>(transactionProvider, (previous, next) {
+      if (previous != null &&
+          previous.status != TransactionStatus.loaded &&
+          next.status == TransactionStatus.loaded &&
+          !ref.read(dashboardProvider).isLoading) {
+        ref.read(dashboardProvider.notifier).refresh();
+      }
+    });
+
+    // Budget eklenince/silinince/güncellenince dashboard'u yenile
+    ref.listen<BudgetState>(budgetProvider, (previous, next) {
+      if (previous != null &&
+          previous.status != BudgetStatus.loaded &&
+          next.isLoaded &&
+          !ref.read(dashboardProvider).isLoading) {
+        ref.read(dashboardProvider.notifier).refresh();
       }
     });
 
