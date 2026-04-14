@@ -1,8 +1,10 @@
 // lib/features/budget/presentation/screens/budget_screen.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/budget_provider.dart';
 import '../providers/budget_state.dart';
 import '../widgets/budget_card.dart';
@@ -33,11 +35,22 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final state = ref.watch(budgetProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(state),
-      body: _buildBody(state),
-    );
-  }
+    backgroundColor: AppColors.background,
+    appBar: _buildAppBar(state),
+    body: _buildBody(state),
+    // ← YENİ: FAB eklendi
+    floatingActionButton: FloatingActionButton.extended(
+      onPressed: () => _navigateToAddBudget(),
+      backgroundColor: AppColors.primary,
+      foregroundColor: AppColors.textOnPrimary,
+      icon: const Icon(Icons.add_rounded),
+      label: const Text(
+        'Bütçe Ekle',
+        style: TextStyle(fontWeight: FontWeight.w600),
+      ),
+    ),
+  );
+}
 
   PreferredSizeWidget _buildAppBar(BudgetState state) {
     return AppBar(
@@ -258,16 +271,8 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   }
 
   void _onAddBudget() {
-    // TODO: Budget ekleme sheet'i aç
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Bütçe ekleme yakında...'),
-        backgroundColor: AppColors.info,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-  }
+  _navigateToAddBudget();
+}
 
   void _onEditBudget(budget) {
     // TODO: Budget düzenleme sheet'i aç
@@ -315,6 +320,13 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       }
     }
   }
+
+
+  void _navigateToAddBudget() {
+  final currentMonth = ref.read(budgetProvider).selectedMonth;
+  context.push('${AppRoutes.addBudget}?month=$currentMonth');
+}
+
 
   String _formatMonth(String month) {
     final parts = month.split('-');

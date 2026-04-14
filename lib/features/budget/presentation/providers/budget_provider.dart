@@ -86,7 +86,9 @@ final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
 });
 
 /// Budget Provider - Ana provider
-final budgetProvider = StateNotifierProvider<BudgetNotifier, BudgetState>((ref) {
+final budgetProvider = StateNotifierProvider<BudgetNotifier, BudgetState>((
+  ref,
+) {
   if (kBudgetUseMockData) {
     return BudgetNotifier.mock();
   }
@@ -102,15 +104,15 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
 
   // Normal constructor (API ile)
   BudgetNotifier(BudgetRepository repository)
-      : _repository = repository,
-        _useMock = false,
-        super(BudgetState.initial());
+    : _repository = repository,
+      _useMock = false,
+      super(BudgetState.initial());
 
   // Mock constructor (Test için)
   BudgetNotifier.mock()
-      : _repository = null,
-        _useMock = true,
-        super(BudgetState.initial());
+    : _repository = null,
+      _useMock = true,
+      super(BudgetState.initial());
 
   // ============ AY SEÇİMİ ============
 
@@ -118,10 +120,7 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
   void setMonth(String month) {
     if (state.selectedMonth == month) return;
 
-    state = state.copyWith(
-      selectedMonth: month,
-      status: BudgetStatus.initial,
-    );
+    state = state.copyWith(selectedMonth: month, status: BudgetStatus.initial);
     loadBudgets();
   }
 
@@ -161,10 +160,7 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
 
   /// Bütçeleri yükle
   Future<void> loadBudgets() async {
-    state = state.copyWith(
-      status: BudgetStatus.loading,
-      clearError: true,
-    );
+    state = state.copyWith(status: BudgetStatus.loading, clearError: true);
 
     if (_useMock) {
       await _loadBudgetsMock();
@@ -175,7 +171,9 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
 
   Future<void> _loadBudgetsApi() async {
     try {
-      final response = await _repository!.getBudgets(month: state.selectedMonth);
+      final response = await _repository!.getBudgets(
+        month: state.selectedMonth,
+      );
 
       state = state.copyWith(
         budgets: response.data,
@@ -238,9 +236,7 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
 
   /// Yeni budget oluşturulduğunda listeye ekle
   void onBudgetCreated(BudgetModel budget) {
-    state = state.copyWith(
-      budgets: [budget, ...state.budgets],
-    );
+    state = state.copyWith(budgets: [budget, ...state.budgets]);
   }
 
   /// Budget güncellendiğinde listede güncelle
@@ -251,5 +247,67 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
       updatedList[index] = budget;
       state = state.copyWith(budgets: updatedList);
     }
+  }
+
+  /// Yeni budget oluştur
+  Future<bool> createBudget({
+    required String categoryId,
+    required double limit,
+    required String month,
+  }) async {
+    if (_useMock) {
+      return _createBudgetMock(categoryId, limit, month);
+    }
+    return _createBudgetApi(categoryId, limit, month);
+  }
+
+  Future<bool> _createBudgetApi(
+    String categoryId,
+    double limit,
+    String month,
+  ) async {
+    try {
+      final response = await _repository!.createBudget(
+        categoryId: categoryId,
+        limit: limit,
+        month: month,
+      );
+
+      // Başarılı ise listeyi yenile (aynı ay için)
+      if (state.selectedMonth == month) {
+        await loadBudgets();
+      }
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> _createBudgetMock(
+    String categoryId,
+    double limit,
+    String month,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // Mock için yeni budget oluştur
+    final newBudget = BudgetModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      category: BudgetCategoryResponse(
+        id: categoryId,
+        name: 'Yeni Kategori',
+        icon: '📦',
+        type: 'expense',
+      ),
+      limit: limit,
+      spent: 0,
+      remaining: limit,
+      percentUsed: 0,
+    );
+
+    onBudgetCreated(newBudget);
+    return true;
   }
 }

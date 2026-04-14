@@ -2,6 +2,7 @@ import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:finbud_app/core/shared/widgets/main_scaffold.dart';
 import 'package:finbud_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:finbud_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:finbud_app/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:finbud_app/features/budget/presentation/screens/budget_screen.dart';
 import 'package:finbud_app/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:finbud_app/features/transaction/presentation/screens/transaction_screen.dart';
@@ -103,12 +104,24 @@ class AppRouter {
           ),
         ),
         GoRoute(
-          path: AppRoutes.budget,
-          name: 'budget',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: BudgetScreen(),
-          ),
-        ),
+  path: AppRoutes.budget,
+  name: 'budget',
+  pageBuilder: (context, state) => const NoTransitionPage(
+    child: BudgetScreen(),
+  ),
+  routes: [
+    // ← YENİ: Alt route olarak ekleme ekranı
+    GoRoute(
+      path: 'add',
+      name: 'addBudget',
+      builder: (context, state) {
+        // Mevcut ayı parametre olarak al (opsiyonel)
+        final month = state.uri.queryParameters['month'];
+        return AddBudgetScreen(initialMonth: month);
+      },
+    ),
+  ],
+),
         GoRoute(
           path: AppRoutes.profile,
           name: 'profile',
