@@ -310,4 +310,50 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
     onBudgetCreated(newBudget);
     return true;
   }
+  /// Budget güncelle (KAN-88)
+  Future<bool> updateBudget({
+    required String id,
+    required double limit,
+  }) async {
+    if (_useMock) {
+      return _updateBudgetMock(id, limit);
+    }
+    return _updateBudgetApi(id, limit);
+  }
+
+  Future<bool> _updateBudgetApi(String id, double limit) async {
+    try {
+      await _repository!.updateBudget(id: id, limit: limit);
+      // Başarılı ise listeyi yenile
+      await loadBudgets();
+      return true;
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> _updateBudgetMock(String id, double limit) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Mock için budget'ı bul ve güncelle
+    final index = state.budgets.indexWhere((b) => b.id == id);
+    if (index != -1) {
+      final oldBudget = state.budgets[index];
+      final updatedBudget = BudgetModel(
+        id: oldBudget.id,
+        category: oldBudget.category,
+        limit: limit,
+        spent: oldBudget.spent,
+        remaining: limit - oldBudget.spent,
+        percentUsed: oldBudget.spent / limit * 100,
+      );
+      
+      final updatedList = [...state.budgets];
+      updatedList[index] = updatedBudget;
+      state = state.copyWith(budgets: updatedList);
+    }
+    
+    return true;
+  }
 }

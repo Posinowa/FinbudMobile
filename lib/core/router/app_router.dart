@@ -2,8 +2,10 @@ import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:finbud_app/core/shared/widgets/main_scaffold.dart';
 import 'package:finbud_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:finbud_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:finbud_app/features/budget/data/models/budget_model.dart';
 import 'package:finbud_app/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:finbud_app/features/budget/presentation/screens/budget_screen.dart';
+import 'package:finbud_app/features/budget/presentation/screens/edit_budget_screen.dart';
 import 'package:finbud_app/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:finbud_app/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:finbud_app/features/user/presentation/screens/profile_screen.dart';
@@ -118,6 +120,15 @@ class AppRouter {
         // Mevcut ayı parametre olarak al (opsiyonel)
         final month = state.uri.queryParameters['month'];
         return AddBudgetScreen(initialMonth: month);
+      },
+    ),
+    GoRoute(
+      path: 'edit',
+      name: 'editBudget',
+      builder: (context, state) {
+        // Budget objesini extra olarak al
+        final budget = state.extra as BudgetModel;
+        return EditBudgetScreen(budget: budget);
       },
     ),
   ],

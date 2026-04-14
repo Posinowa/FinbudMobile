@@ -2,6 +2,7 @@
 
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/router/app_routes.dart';
+import 'package:finbud_app/features/budget/data/models/budget_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -274,15 +275,11 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   _navigateToAddBudget();
 }
 
-  void _onEditBudget(budget) {
-    // TODO: Budget düzenleme sheet'i aç
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${budget.category.name} bütçesi düzenleniyor...'),
-        backgroundColor: AppColors.info,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+  void _onEditBudget(BudgetModel budget) {
+    // KAN-88: Budget düzenleme ekranına git
+    context.push(
+      AppRoutes.editBudget,
+      extra: budget,
     );
   }
 
