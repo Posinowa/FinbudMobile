@@ -68,23 +68,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Ozet'),
+        title: const Text(
+          'Finbud',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () => _showLogoutDialog(context),
-            icon: const Icon(Icons.logout, color: AppColors.expense),
-            tooltip: 'Cikis Yap',
-          ),
-        ],
         bottom: state.isLoading
             ? const PreferredSize(
                 preferredSize: Size.fromHeight(2),
                 child: LinearProgressIndicator(minHeight: 2),
               )
             : null,
+        centerTitle: true,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
