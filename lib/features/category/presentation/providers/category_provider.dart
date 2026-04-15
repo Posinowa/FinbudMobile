@@ -158,6 +158,43 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
     );
   }
 
+  /// Yeni kategori oluştur
+  /// Başarılı olursa yeni kategori state'e eklenir ve döndürülür
+  Future<CategoryModel?> createCategory({
+    required String name,
+    required String icon,
+    required String type,
+  }) async {
+    if (_useMock) {
+      // Mock modda sahte kategori ekle
+      final newCategory = CategoryModel(
+        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
+        name: name,
+        icon: icon,
+        type: type,
+        userId: 'mock_user',
+      );
+      state = state.copyWith(
+        categories: [...state.categories, newCategory],
+      );
+      return newCategory;
+    }
+
+    try {
+      final newCategory = await _repository!.createCategory(
+        name: name,
+        icon: icon,
+        type: type,
+      );
+      state = state.copyWith(
+        categories: [...state.categories, newCategory],
+      );
+      return newCategory;
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Kategorileri yenile
   Future<void> refresh() async {
     state = state.copyWith(status: CategoryStatus.loading, clearError: true);

@@ -3,6 +3,7 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
+import 'package:finbud_app/features/category/presentation/widgets/add_category_sheet.dart';
 import 'package:finbud_app/features/transaction/data/models/transaction_model.dart';
 import 'package:finbud_app/features/transaction/presentation/providers/transaction_provider.dart';
 import 'package:flutter/material.dart';
@@ -369,13 +370,43 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Kategori',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Kategori',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _openAddCategorySheet(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, size: 14, color: AppColors.primary),
+                    SizedBox(width: 4),
+                    Text(
+                      'Kategori Ekle',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<CategoryModel>(
@@ -608,6 +639,28 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+      ),
+    );
+  }
+
+  void _openAddCategorySheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddCategorySheet(
+        initialType: _selectedType,
+        onCategoryCreated: (categoryId) {
+          // Yeni kategori oluşturulunca otomatik seç
+          final categoryState = ref.read(categoryProvider);
+          final newCategory = categoryState.categories.firstWhere(
+            (c) => c.id == categoryId,
+            orElse: () => categoryState.categories.last,
+          );
+          setState(() {
+            _selectedCategory = newCategory;
+          });
+        },
       ),
     );
   }

@@ -55,6 +55,35 @@ class CategoryRepository {
     return getCategories(type: 'expense');
   }
 
+  /// Yeni kategori oluştur (POST /categories)
+  Future<CategoryModel> createCategory({
+    required String name,
+    required String icon,
+    required String type,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/categories',
+        data: {
+          'name': name,
+          'icon': icon,
+          'type': type,
+        },
+      );
+
+      final data = response.data;
+
+      // API response: { "data": {...} } veya direkt obje
+      if (data is Map<String, dynamic> && data.containsKey('data')) {
+        return CategoryModel.fromJson(data['data'] as Map<String, dynamic>);
+      }
+
+      return CategoryModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   /// Tek bir kategori getir
   Future<CategoryModel> getCategoryById(String id) async {
     try {
