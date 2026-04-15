@@ -1,6 +1,7 @@
 // lib/features/transaction/presentation/screens/transaction_list_screen.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/transaction/data/models/transaction_model.dart';
 import 'package:finbud_app/features/transaction/presentation/widgets/add_transaction_sheet.dart';
 import 'package:flutter/material.dart';
@@ -345,14 +346,7 @@ void _showEditTransactionSheet(TransactionModel transaction) {
     if (confirmed == true && mounted) {
       final success = await ref.read(transactionProvider.notifier).deleteTransaction(transaction.id);
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('İşlem silindi'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+        AppSnackBar.showSuccess(context, 'İşlem silindi');
       }
     }
   }

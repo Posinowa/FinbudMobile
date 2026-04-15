@@ -195,6 +195,65 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
     }
   }
 
+  /// Kategori güncelle
+  Future<bool> updateCategory({
+    required String id,
+    required String name,
+    required String icon,
+    required String type,
+  }) async {
+    if (_useMock) {
+      final updated = state.categories.map((c) {
+        if (c.id == id) {
+          return CategoryModel(
+            id: c.id,
+            name: name,
+            icon: icon,
+            type: type,
+            userId: c.userId,
+          );
+        }
+        return c;
+      }).toList();
+      state = state.copyWith(categories: updated);
+      return true;
+    }
+
+    try {
+      final updatedCategory = await _repository!.updateCategory(
+        id: id,
+        name: name,
+        icon: icon,
+        type: type,
+      );
+      final updated = state.categories.map((c) {
+        return c.id == id ? updatedCategory : c;
+      }).toList();
+      state = state.copyWith(categories: updated);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Kategori sil
+  Future<bool> deleteCategory(String id) async {
+    if (_useMock) {
+      final updated = state.categories.where((c) => c.id != id).toList();
+      state = state.copyWith(categories: updated);
+      return true;
+    }
+
+    try {
+      await _repository!.deleteCategory(id);
+      final updated = state.categories.where((c) => c.id != id).toList();
+      state = state.copyWith(categories: updated);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Kategorileri yenile
   Future<void> refresh() async {
     state = state.copyWith(status: CategoryStatus.loading, clearError: true);

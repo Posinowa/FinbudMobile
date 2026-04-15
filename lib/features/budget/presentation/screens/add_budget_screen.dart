@@ -1,6 +1,7 @@
 // lib/features/budget/presentation/screens/add_budget_screen.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
 import 'package:flutter/material.dart';
@@ -375,29 +376,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       if (!mounted) return;
 
       if (success) {
-        // Başarılı mesajı göster
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Bütçe başarıyla oluşturuldu'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
-        
-        // Geri dön
+        AppSnackBar.showSuccess(context, 'Bütçe başarıyla oluşturuldu');
         context.pop();
       } else {
-        // Hata mesajı göster
         final errorMessage = ref.read(budgetProvider).errorMessage;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage ?? 'Bir hata oluştu'),
-            backgroundColor: AppColors.danger,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+        AppSnackBar.showError(context, errorMessage ?? 'Bir hata oluştu');
       }
     } finally {
       if (mounted) {

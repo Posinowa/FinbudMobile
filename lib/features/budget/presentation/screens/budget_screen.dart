@@ -2,6 +2,7 @@
 
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/router/app_routes.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/budget/data/models/budget_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -289,19 +290,16 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   final success = await ref.read(budgetProvider.notifier).deleteBudget(budget.id);
   
   if (mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(success ? 'Bütçe silindi' : 'Bütçe silinemedi'),
-        backgroundColor: success ? AppColors.success : AppColors.danger,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        action: success ? null : SnackBarAction(
-          label: 'Tekrar Dene',
-          textColor: Colors.white,
-          onPressed: () => _onDeleteBudget(budget),
-        ),
-      ),
-    );
+    if (success) {
+      AppSnackBar.showSuccess(context, 'Bütçe silindi');
+    } else {
+      AppSnackBar.showError(
+        context,
+        'Bütçe silinemedi',
+        actionLabel: 'Tekrar Dene',
+        onAction: () => _onDeleteBudget(budget),
+      );
+    }
   }
 }
 

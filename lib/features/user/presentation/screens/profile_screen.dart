@@ -1,4 +1,6 @@
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
+import 'package:finbud_app/features/category/presentation/screens/category_list_screen.dart';
 import 'package:finbud_app/features/user/presentation/providers/user_provider.dart';
 import 'package:finbud_app/features/user/presentation/providers/user_state.dart';
 import 'package:flutter/material.dart';
@@ -103,6 +105,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _SettingsCard(
               items: [
                 _SettingsItem(
+                  icon: Icons.category_outlined,
+                  label: 'Kategoriler',
+                  onTap: () => _openCategoryList(context),
+                ),
+                _SettingsItem(
                   icon: Icons.lock_outline,
                   label: 'Şifre Değiştir',
                   onTap: () => _showChangePasswordSheet(context),
@@ -115,6 +122,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _LogoutButton(),
           ],
         ),
+      ),
+    );
+  }
+
+  void _openCategoryList(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const CategoryListScreen(),
       ),
     );
   }
@@ -438,22 +453,11 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
 
     if (success) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Şifre başarıyla değiştirildi ✓'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackBar.showSuccess(context, 'Şifre başarıyla değiştirildi');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ref.read(userProvider).errorMessage ?? 'Şifre değiştirme başarısız',
-          ),
-          backgroundColor: AppColors.danger,
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppSnackBar.showError(
+        context,
+        ref.read(userProvider).errorMessage ?? 'Şifre değiştirme başarısız',
       );
     }
   }

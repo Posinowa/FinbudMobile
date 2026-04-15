@@ -1,4 +1,5 @@
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/utils/validators.dart';
@@ -53,12 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleRegister() async {
   if (!_acceptTerms) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Kullanım koşullarını kabul etmelisiniz'),
-        backgroundColor: Colors.red,
-      ),
-    );
+    AppSnackBar.showError(context, 'Kullanım koşullarını kabul etmelisiniz');
     return;
   }
 
@@ -77,25 +73,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         if (!mounted) return;
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Kayıt başarılı! Giriş yapabilirsiniz.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        
+
+        AppSnackBar.showSuccess(context, 'Kayıt başarılı! Giriş yapabilirsiniz.');
+
         // Login ekranına yönlendir
         context.pop();
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Kayıt başarısız: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AppSnackBar.showError(context, 'Kayıt başarısız: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

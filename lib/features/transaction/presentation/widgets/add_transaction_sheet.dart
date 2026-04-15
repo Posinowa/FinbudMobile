@@ -1,6 +1,7 @@
 // lib/features/transaction/presentation/widgets/add_transaction_sheet.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
 import 'package:finbud_app/features/category/presentation/widgets/add_category_sheet.dart';
@@ -709,51 +710,26 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       if (mounted) {
         if (success) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                widget.isEditMode
-                    ? 'İşlem başarıyla güncellendi'
-                    : (_selectedType == 'income'
-                        ? 'Gelir başarıyla eklendi'
-                        : 'Gider başarıyla eklendi'),
-              ),
-              backgroundColor: AppColors.success,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            widget.isEditMode
+                ? 'İşlem başarıyla güncellendi'
+                : (_selectedType == 'income'
+                    ? 'Gelir başarıyla eklendi'
+                    : 'Gider başarıyla eklendi'),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                widget.isEditMode
-                    ? 'İşlem güncellenirken bir hata oluştu'
-                    : 'İşlem eklenirken bir hata oluştu',
-              ),
-              backgroundColor: AppColors.danger,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+          AppSnackBar.showError(
+            context,
+            widget.isEditMode
+                ? 'İşlem güncellenirken bir hata oluştu'
+                : 'İşlem eklenirken bir hata oluştu',
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Hata: $e'),
-            backgroundColor: AppColors.danger,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
+        AppSnackBar.showError(context, 'Hata: $e');
       }
     } finally {
       if (mounted) {

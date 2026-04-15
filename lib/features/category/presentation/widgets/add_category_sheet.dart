@@ -1,6 +1,7 @@
 // lib/features/category/presentation/widgets/add_category_sheet.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -403,38 +404,18 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
       if (mounted) {
         if (newCategory != null) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${_nameController.text.trim()} kategorisi oluşturuldu',
-              ),
-              backgroundColor: AppColors.success,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            '${_nameController.text.trim()} kategorisi oluşturuldu',
           );
           widget.onCategoryCreated?.call(newCategory.id);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Kategori oluşturulurken bir hata oluştu'),
-              backgroundColor: AppColors.danger,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          AppSnackBar.showError(context, 'Kategori oluşturulurken bir hata oluştu');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Hata: $e'),
-            backgroundColor: AppColors.danger,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackBar.showError(context, 'Hata: $e');
       }
     } finally {
       if (mounted) {

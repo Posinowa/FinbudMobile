@@ -1,5 +1,6 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/router/app_routes.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,9 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _handleForgotPassword() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Şifre sıfırlama özelliği yakında')),
-    );
+    AppSnackBar.showInfo(context, 'Şifre sıfırlama özelliği yakında');
   }
 
   @override
@@ -61,23 +60,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Hata mesajı varsa göster
     ref.listen<String?>(authErrorProvider, (previous, next) {
       if (next != null && next.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            action: SnackBarAction(
-              label: 'Kapat',
-              textColor: Colors.white,
-              onPressed: () {
-                ref.read(authProvider.notifier).clearError();
-              },
-            ),
-          ),
+        AppSnackBar.showError(
+          context,
+          next,
+          actionLabel: 'Kapat',
+          onAction: () => ref.read(authProvider.notifier).clearError(),
         );
       }
     });

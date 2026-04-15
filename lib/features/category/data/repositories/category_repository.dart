@@ -84,6 +84,44 @@ class CategoryRepository {
     }
   }
 
+  /// Kategori güncelle (PUT /categories/:id)
+  Future<CategoryModel> updateCategory({
+    required String id,
+    required String name,
+    required String icon,
+    required String type,
+  }) async {
+    try {
+      final response = await _dio.put(
+        '/categories/$id',
+        data: {
+          'name': name,
+          'icon': icon,
+          'type': type,
+        },
+      );
+
+      final data = response.data;
+
+      if (data is Map<String, dynamic> && data.containsKey('data')) {
+        return CategoryModel.fromJson(data['data'] as Map<String, dynamic>);
+      }
+
+      return CategoryModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Kategori sil (DELETE /categories/:id)
+  Future<void> deleteCategory(String id) async {
+    try {
+      await _dio.delete('/categories/$id');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   /// Tek bir kategori getir
   Future<CategoryModel> getCategoryById(String id) async {
     try {

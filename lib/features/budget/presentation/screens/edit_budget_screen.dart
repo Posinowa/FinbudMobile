@@ -1,6 +1,7 @@
 // lib/features/budget/presentation/screens/edit_budget_screen.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/budget/data/models/budget_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -404,14 +405,7 @@ class _EditBudgetScreenState extends ConsumerState<EditBudgetScreen> {
     
     // Eğer limit değişmediyse uyarı ver
     if (newLimit == widget.budget.limit) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Limit değişmedi'),
-          backgroundColor: AppColors.info,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      AppSnackBar.showInfo(context, 'Limit değişmedi');
       return;
     }
 
@@ -426,29 +420,11 @@ class _EditBudgetScreenState extends ConsumerState<EditBudgetScreen> {
       if (!mounted) return;
 
       if (success) {
-        // Başarılı mesajı göster
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Bütçe başarıyla güncellendi'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
-
-        // Geri dön
+        AppSnackBar.showSuccess(context, 'Bütçe başarıyla güncellendi');
         context.pop();
       } else {
-        // Hata mesajı göster
         final errorMessage = ref.read(budgetProvider).errorMessage;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage ?? 'Bir hata oluştu'),
-            backgroundColor: AppColors.danger,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+        AppSnackBar.showError(context, errorMessage ?? 'Bir hata oluştu');
       }
     } finally {
       if (mounted) {
