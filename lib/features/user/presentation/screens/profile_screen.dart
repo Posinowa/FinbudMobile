@@ -382,7 +382,7 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
                   onToggle: () => setState(() => _hideNew = !_hideNew),
                   validator: (val) {
                     if (val == null || val.isEmpty) return 'Yeni şifrenizi girin';
-                    if (val.length < 6) return 'En az 6 karakter olmalı';
+                    if (val.length < 8) return 'En az 8 karakter olmalı';
                     return null;
                   },
                 ),
