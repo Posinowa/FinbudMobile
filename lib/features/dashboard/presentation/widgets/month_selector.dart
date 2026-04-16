@@ -127,6 +127,10 @@ class MonthSelector extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width > 600 ? 540 : double.infinity,
+      ),
       builder: (context) => _MonthPickerSheet(
         currentYear: currentYear,
         currentMonth: currentMonth,
@@ -174,94 +178,99 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
   Widget build(BuildContext context) {
     final now = DateTime.now();
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.border,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  onPressed: () => setState(() => _selectedYear--),
-                ),
-                Text(
-                  '$_selectedYear',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  onPressed: _selectedYear < now.year
-                      ? () => setState(() => _selectedYear++)
-                      : null,
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 1.5,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
+    return SafeArea(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
               ),
-              itemCount: 12,
-              itemBuilder: (context, index) {
-                final month = index + 1;
-                final isSelected = _selectedYear == widget.currentYear &&
-                    month == widget.currentMonth;
-                final isFuture = _selectedYear == now.year && month > now.month ||
-                    _selectedYear > now.year;
-
-                return GestureDetector(
-                  onTap: isFuture ? null : () => widget.onMonthSelected(_selectedYear, month),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary : AppColors.background,
-                      borderRadius: BorderRadius.circular(8),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: () => setState(() => _selectedYear--),
+                  ),
+                  Text(
+                    '$_selectedYear',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
-                    child: Center(
-                      child: Text(
-                        _getShortMonthName(month),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected
-                              ? Colors.white
-                              : isFuture ? AppColors.textHint : AppColors.textPrimary,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    onPressed: _selectedYear < now.year
+                        ? () => setState(() => _selectedYear++)
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 1.5,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                ),
+                itemCount: 12,
+                itemBuilder: (context, index) {
+                  final month = index + 1;
+                  final isSelected = _selectedYear == widget.currentYear &&
+                      month == widget.currentMonth;
+                  final isFuture = _selectedYear == now.year && month > now.month ||
+                      _selectedYear > now.year;
+
+                  return GestureDetector(
+                    onTap: isFuture ? null : () => widget.onMonthSelected(_selectedYear, month),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primary : AppColors.background,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _getShortMonthName(month),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
+                                : isFuture ? AppColors.textHint : AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-        ],
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
