@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finbud_app/core/network/dio_client.dart';
 import 'package:finbud_app/core/router/app_router.dart';
+import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
+import 'package:finbud_app/features/transaction/presentation/providers/transaction_provider.dart';
+import 'package:finbud_app/features/budget/presentation/providers/budget_provider.dart';
+import 'package:finbud_app/features/dashboard/presentation/providers/dashboard_provider.dart';
 import '../../data/repositories/user_repository.dart';
 import 'user_state.dart';
 
@@ -12,13 +16,14 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
 /// Ana user provider
 final userProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
   final repository = ref.watch(userRepositoryProvider);
-  return UserNotifier(repository);
+  return UserNotifier(repository, ref);
 });
 
 class UserNotifier extends StateNotifier<UserState> {
   final UserRepository _repository;
+  final Ref _ref;
 
-  UserNotifier(this._repository) : super(UserState.initial());
+  UserNotifier(this._repository, this._ref) : super(UserState.initial());
 
   /// GET /users/me — kullanıcı bilgilerini yükle
   Future<void> loadUser() async {
@@ -77,9 +82,13 @@ class UserNotifier extends StateNotifier<UserState> {
     }
   }
 
-  /// Çıkış yap — token'ları sil, login'e yönlendir
-  /// (Backend'de /auth/logout endpoint'i olmadığı için sadece local temizlik)
+  /// Çıkış yap — token'ları sil, tüm provider'ları sıfırla, login'e yönlendir
   Future<void> logout() async {
+    _ref.invalidate(categoryProvider);
+    _ref.invalidate(transactionProvider);
+    _ref.invalidate(budgetProvider);
+    _ref.invalidate(dashboardProvider);
+    state = UserState.initial();
     await AppRouter.logout();
   }
 
