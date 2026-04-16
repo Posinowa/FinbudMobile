@@ -63,7 +63,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen>
           indicatorColor: AppColors.primary,
           tabs: const [
             Tab(text: 'Varsayılan'),
-            Tab(text: 'Kendi Kategorilerim'),
+            Tab(text: 'Benim Kategorilerim'),
           ],
         ),
       ),
@@ -159,7 +159,7 @@ class _SystemCategoriesTab extends StatelessWidget {
             icon: Icons.arrow_downward_rounded,
           ),
           const SizedBox(height: 8),
-          _CategoryGrid(categories: incomeCategories, isReadOnly: true),
+          ...incomeCategories.map((c) => _ReadOnlyCategoryTile(category: c)),
           const SizedBox(height: 20),
         ],
         if (expenseCategories.isNotEmpty) ...[
@@ -169,7 +169,7 @@ class _SystemCategoriesTab extends StatelessWidget {
             icon: Icons.arrow_upward_rounded,
           ),
           const SizedBox(height: 8),
-          _CategoryGrid(categories: expenseCategories, isReadOnly: true),
+          ...expenseCategories.map((c) => _ReadOnlyCategoryTile(category: c)),
         ],
       ],
     );
@@ -311,6 +311,56 @@ class _UserCategoriesTab extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Salt-okunur kategori satırı (sistem kategorileri için)
+// ─────────────────────────────────────────────────────────────────────────────
+class _ReadOnlyCategoryTile extends StatelessWidget {
+  final CategoryModel category;
+
+  const _ReadOnlyCategoryTile({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            category.icon ?? '📦',
+            style: const TextStyle(fontSize: 20),
+          ),
+        ),
+        title: Text(
+          category.name,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        trailing: const Icon(
+          Icons.lock_outline,
+          size: 18,
+          color: AppColors.textHint,
+        ),
       ),
     );
   }
