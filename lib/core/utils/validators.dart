@@ -19,6 +19,15 @@ class Validators {
     if (value.length < 8) {
       return 'Şifre en az 8 karakter olmalı';
     }
+    if (!value.contains(RegExp(r'[A-Z]'))) {
+      return 'Şifre en az 1 büyük harf içermelidir';
+    }
+    if (!value.contains(RegExp(r'[a-z]'))) {
+      return 'Şifre en az 1 küçük harf içermelidir';
+    }
+    if (!value.contains(RegExp(r'[0-9]'))) {
+      return 'Şifre en az 1 rakam içermelidir';
+    }
     return null;
   }
 
