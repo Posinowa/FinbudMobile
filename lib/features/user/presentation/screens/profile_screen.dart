@@ -101,7 +101,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 24),
 
-            // ── Ayarlar listesi ──────────────────────────────────────
+            // ── Kategoriler ───────────────────────────────────────────
             _SettingsCard(
               items: [
                 _SettingsItem(
@@ -109,6 +109,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   label: 'Kategoriler',
                   onTap: () => _openCategoryList(context),
                 ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // ── Şifre Değiştir ────────────────────────────────────────
+            _SettingsCard(
+              items: [
                 _SettingsItem(
                   icon: Icons.lock_outline,
                   label: 'Şifre Değiştir',
