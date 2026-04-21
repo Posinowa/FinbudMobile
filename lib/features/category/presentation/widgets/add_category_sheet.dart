@@ -428,3 +428,19 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
     }
   }
 }
+t, 'Kategori oluşturulurken bir hata oluştu');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackBar.showError(context, 'Hata: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+}
