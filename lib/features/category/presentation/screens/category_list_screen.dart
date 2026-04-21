@@ -157,7 +157,7 @@ class _SystemCategoriesTab extends StatelessWidget {
           _SectionHeader(
             label: 'Gelir',
             color: AppColors.income,
-            icon: Icons.arrow_downward_rounded,
+            icon: Icons.arrow_upward_rounded,
           ),
           const SizedBox(height: 8),
           ...incomeCategories.map((c) => _ReadOnlyCategoryTile(category: c)),
@@ -167,7 +167,7 @@ class _SystemCategoriesTab extends StatelessWidget {
           _SectionHeader(
             label: 'Gider',
             color: AppColors.expense,
-            icon: Icons.arrow_upward_rounded,
+            icon: Icons.arrow_downward_rounded,
           ),
           const SizedBox(height: 8),
           ...expenseCategories.map((c) => _ReadOnlyCategoryTile(category: c)),
@@ -233,7 +233,7 @@ class _UserCategoriesTab extends ConsumerWidget {
           _SectionHeader(
             label: 'Gelir',
             color: AppColors.income,
-            icon: Icons.arrow_downward_rounded,
+            icon: Icons.arrow_upward_rounded,
           ),
           const SizedBox(height: 8),
           ...incomeCategories.map(
@@ -249,7 +249,7 @@ class _UserCategoriesTab extends ConsumerWidget {
           _SectionHeader(
             label: 'Gider',
             color: AppColors.expense,
-            icon: Icons.arrow_upward_rounded,
+            icon: Icons.arrow_downward_rounded,
           ),
           const SizedBox(height: 8),
           ...expenseCategories.map(

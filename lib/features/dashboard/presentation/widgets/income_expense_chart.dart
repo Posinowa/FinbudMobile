@@ -54,7 +54,7 @@ class IncomeExpenseChart extends StatelessWidget {
                   value: income,
                   heightRatio: incomeHeight,
                   color: AppColors.income,
-                  icon: Icons.arrow_downward,
+                  icon: Icons.arrow_upward,
                 ),
                 const SizedBox(width: 48),
                 _buildBar(
@@ -62,7 +62,7 @@ class IncomeExpenseChart extends StatelessWidget {
                   value: expense,
                   heightRatio: expenseHeight,
                   color: AppColors.expense,
-                  icon: Icons.arrow_upward,
+                  icon: Icons.arrow_downward,
                 ),
               ],
             ),

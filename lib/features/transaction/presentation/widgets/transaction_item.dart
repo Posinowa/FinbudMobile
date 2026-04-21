@@ -113,8 +113,8 @@ class TransactionItem extends StatelessWidget {
       child: Center(
         child: Icon(
           transaction.isIncome
-              ? Icons.arrow_downward_rounded
-              : Icons.arrow_upward_rounded,
+              ? Icons.arrow_upward_rounded
+              : Icons.arrow_downward_rounded,
           color: color,
           size: 24,
         ),

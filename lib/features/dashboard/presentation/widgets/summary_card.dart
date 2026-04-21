@@ -132,7 +132,7 @@ class DashboardSummaryCards extends StatelessWidget {
               child: SummaryCard(
                 title: 'Gelir',
                 amount: totalIncome,
-                icon: Icons.arrow_downward,
+                icon: Icons.arrow_upward,
                 iconColor: AppColors.income,
               ),
             ),
@@ -141,7 +141,7 @@ class DashboardSummaryCards extends StatelessWidget {
               child: SummaryCard(
                 title: 'Gider',
                 amount: totalExpense,
-                icon: Icons.arrow_upward,
+                icon: Icons.arrow_downward,
                 iconColor: AppColors.expense,
               ),
             ),
