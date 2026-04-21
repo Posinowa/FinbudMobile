@@ -1,8 +1,10 @@
+
 // lib/features/category/presentation/widgets/add_category_sheet.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,18 +30,8 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
   final _nameController = TextEditingController();
 
   String _selectedType = 'expense';
-  String _selectedIcon = '📦';
+  String _selectedIcon = kDefaultCategoryIcon;
   bool _isLoading = false;
-
-  /// Seçilebilecek emojiler
-  static const List<String> _emojiOptions = [
-    // Gider emojileri
-    '🛒', '🏠', '💡', '🚗', '🍽️', '🏥', '🎬', '👕', '📚', '📺',
-    '✈️', '🎮', '💄', '🐾', '🔧', '⚽', '🎵', '📦', '🛍️', '☕',
-    '🍕', '💊', '🏋️', '🎓', '🚌', '🛺', '🏪', '🧾', '📱', '💻',
-    // Gelir emojileri
-    '💰', '💼', '📈', '🎁', '🏦', '💵', '🤝', '🏆', '⭐', '🌟',
-  ];
 
   @override
   void initState() {
@@ -289,10 +281,7 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
                 borderRadius: BorderRadius.circular(8),
               ),
               alignment: Alignment.center,
-              child: Text(
-                _selectedIcon,
-                style: const TextStyle(fontSize: 20),
-              ),
+              child: CategoryIconWidget(icon: _selectedIcon, size: 22),
             ),
           ],
         ),
@@ -312,16 +301,12 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
               mainAxisSpacing: 8,
               childAspectRatio: 1,
             ),
-            itemCount: _emojiOptions.length,
+            itemCount: kCategoryIconOptions.length,
             itemBuilder: (context, index) {
-              final emoji = _emojiOptions[index];
-              final isSelected = _selectedIcon == emoji;
+              final iconPath = kCategoryIconOptions[index];
+              final isSelected = _selectedIcon == iconPath;
               return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedIcon = emoji;
-                  });
-                },
+                onTap: () => setState(() => _selectedIcon = iconPath),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
@@ -334,10 +319,7 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
                         : null,
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 20),
-                  ),
+                  child: CategoryIconWidget(icon: iconPath, size: 26),
                 ),
               );
             },
@@ -403,12 +385,32 @@ class _AddCategorySheetState extends ConsumerState<AddCategorySheet> {
 
       if (mounted) {
         if (newCategory != null) {
-          Navigator.pop(context);
-          AppSnackBar.showSuccess(
-            context,
-            '${_nameController.text.trim()} kategorisi oluşturuldu',
-          );
+          // ScaffoldMessenger ve gerekli değerleri pop'tan önce kaydet
+          final messenger = ScaffoldMessenger.of(context);
+          final categoryName = _nameController.text.trim();
+
+          // Callback'i pop'tan önce çağır (state zaten güncel)
           widget.onCategoryCreated?.call(newCategory.id);
+
+          // Sheet'i kapat
+          Navigator.pop(context);
+
+          // Kaydedilmiş messenger ile snackbar göster (deactivated context kullanmadan)
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                '$categoryName kategorisi oluşturuldu',
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+              ),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
         } else {
           AppSnackBar.showError(context, 'Kategori oluşturulurken bir hata oluştu');
         }

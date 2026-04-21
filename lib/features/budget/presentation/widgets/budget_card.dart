@@ -1,6 +1,7 @@
 // lib/features/budget/presentation/widgets/budget_card.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/budget_model.dart';
@@ -91,9 +92,9 @@ class BudgetCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
-            child: Text(
-              budget.category.icon ?? '📊',
-              style: const TextStyle(fontSize: 22),
+            child: CategoryIconWidget(
+              icon: budget.category.icon ?? kDefaultCategoryIcon,
+              size: 22,
             ),
           ),
         ),

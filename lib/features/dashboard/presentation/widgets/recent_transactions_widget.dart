@@ -1,3 +1,4 @@
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_color.dart';
 import '../../domain/models/dashboard_summary.dart';
@@ -35,9 +36,8 @@ class TransactionItem extends StatelessWidget {
                   : AppColors.expense.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              _getCategoryIcon(),
-              color: transaction.isIncome ? AppColors.income : AppColors.expense,
+            child: CategoryIconWidget(
+              icon: transaction.categoryIcon ?? kDefaultCategoryIcon,
               size: 20,
             ),
           ),
@@ -152,19 +152,6 @@ class TransactionItem extends StatelessWidget {
     return months[month - 1];
   }
 
-  IconData _getCategoryIcon() {
-    final iconMap = {
-      'food': Icons.restaurant,
-      'transport': Icons.directions_car,
-      'shopping': Icons.shopping_bag,
-      'entertainment': Icons.movie,
-      'health': Icons.medical_services,
-      'salary': Icons.work,
-      'investment': Icons.trending_up,
-    };
-    return iconMap[transaction.categoryIcon?.toLowerCase()] ??
-        (transaction.isIncome ? Icons.arrow_downward : Icons.arrow_upward);
-  }
 }
 
 /// Son işlemler listesi widget'ı

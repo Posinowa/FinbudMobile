@@ -4,6 +4,7 @@ import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -343,10 +344,7 @@ class _ReadOnlyCategoryTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
-          child: Text(
-            category.icon ?? '📦',
-            style: const TextStyle(fontSize: 20),
-          ),
+          child: CategoryIconWidget(icon: category.icon ?? 'assets/icons/koli.png', size: 24),
         ),
         title: Text(
           category.name,
@@ -400,10 +398,7 @@ class _EditableCategoryTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
-          child: Text(
-            category.icon ?? '📦',
-            style: const TextStyle(fontSize: 20),
-          ),
+          child: CategoryIconWidget(icon: category.icon ?? 'assets/icons/koli.png', size: 24),
         ),
         title: Text(
           category.name,
@@ -468,7 +463,7 @@ class _CategoryGrid extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(c.icon ?? '📦', style: const TextStyle(fontSize: 24)),
+              CategoryIconWidget(icon: c.icon ?? kDefaultCategoryIcon, size: 24),
               const SizedBox(height: 6),
               Text(
                 c.name,
@@ -577,18 +572,13 @@ class _EditCategorySheetState extends ConsumerState<_EditCategorySheet> {
   late String _selectedType;
   bool _isLoading = false;
 
-  static const List<String> _emojiOptions = [
-    '🛒', '🏠', '💡', '🚗', '🍽️', '🏥', '🎬', '👕', '📚', '📺',
-    '✈️', '🎮', '💄', '🐾', '🔧', '⚽', '🎵', '📦', '🛍️', '☕',
-    '🍕', '💊', '🏋️', '🎓', '🚌', '🛺', '🏪', '🧾', '📱', '💻',
-    '💰', '💼', '📈', '🎁', '🏦', '💵', '🤝', '🏆', '⭐', '🌟',
-  ];
+  static const List<String> _emojiOptions = kCategoryIconOptions;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.category.name);
-    _selectedIcon = widget.category.icon ?? '📦';
+    _selectedIcon = widget.category.icon ?? 'assets/icons/koli.png';
     _selectedType = widget.category.type;
   }
 
@@ -786,6 +776,30 @@ class _EditCategorySheetState extends ConsumerState<_EditCategorySheet> {
     );
   }
 
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    try {
+      final success = await ref.read(categoryProvider.notifier).updateCategory(
+        id: widget.category.id,
+        name: _nameController.text.trim(),
+        icon: _selectedIcon,
+        type: _selectedType,
+      );
+      if (!mounted) return;
+      if (success) {
+        Navigator.pop(context);
+        AppSnackBar.showSuccess(context, 'Kategori güncellendi');
+      } else {
+        AppSnackBar.showError(context, 'Kategori güncellenemedi');
+      }
+    } catch (_) {
+      if (mounted) AppSnackBar.showError(context, 'Bir hata oluştu');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Widget _buildIconPicker() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -809,10 +823,7 @@ class _EditCategorySheetState extends ConsumerState<_EditCategorySheet> {
                 borderRadius: BorderRadius.circular(8),
               ),
               alignment: Alignment.center,
-              child: Text(
-                _selectedIcon,
-                style: const TextStyle(fontSize: 20),
-              ),
+              child: CategoryIconWidget(icon: _selectedIcon, size: 22),
             ),
           ],
         ),
@@ -850,7 +861,7 @@ class _EditCategorySheetState extends ConsumerState<_EditCategorySheet> {
                         : null,
                   ),
                   alignment: Alignment.center,
-                  child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                  child: CategoryIconWidget(icon: emoji, size: 26),
                 ),
               );
             },
@@ -877,44 +888,17 @@ class _EditCategorySheetState extends ConsumerState<_EditCategorySheet> {
         ),
         child: _isLoading
             ? const SizedBox(
-                width: 24,
-                height: 24,
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
                   color: Colors.white,
+                  strokeWidth: 2,
                 ),
               )
-            : const Text(
-                'Değişiklikleri Kaydet',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            : const Text('Kaydet'),
       ),
     );
   }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    final success = await ref.read(categoryProvider.notifier).updateCategory(
-          id: widget.category.id,
-          name: _nameController.text.trim(),
-          icon: _selectedIcon,
-          type: _selectedType,
-        );
-
-    if (mounted) {
-      if (success) {
-        Navigator.pop(context);
-        AppSnackBar.showSuccess(context, 'Kategori güncellendi');
-      } else {
-        AppSnackBar.showError(context, 'Kategori güncellenirken hata oluştu');
-        setState(() => _isLoading = false);
-      }
-    }
-  }
 }
+
+// ─────────────────────────────────────────────────────────────────────

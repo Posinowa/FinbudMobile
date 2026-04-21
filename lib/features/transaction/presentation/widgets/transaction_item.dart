@@ -1,6 +1,7 @@
 // lib/features/transaction/presentation/widgets/transaction_item.dart
 
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/transaction_model.dart';
@@ -144,10 +145,7 @@ class TransactionItem extends StatelessWidget {
         Row(
           children: [
             if (transaction.category.icon != null) ...[
-              Text(
-                transaction.category.icon!,
-                style: const TextStyle(fontSize: 12),
-              ),
+              CategoryIconWidget(icon: transaction.category.icon!, size: 16),
               const SizedBox(width: 4),
             ],
             Flexible(

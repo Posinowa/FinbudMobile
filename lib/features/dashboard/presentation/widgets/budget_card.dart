@@ -1,3 +1,4 @@
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_color.dart';
 import '../../domain/models/dashboard_summary.dart';
@@ -37,9 +38,9 @@ class BudgetCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  budget.categoryIcon ?? '📦',
-                  style: const TextStyle(fontSize: 20),
+                child: CategoryIconWidget(
+                  icon: budget.categoryIcon ?? kDefaultCategoryIcon,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 12),
@@ -163,21 +164,6 @@ class BudgetCard extends StatelessWidget {
     return AppColors.border;
   }
 
-  IconData _getCategoryIcon() {
-    final iconMap = {
-      'food': Icons.restaurant,
-      'transport': Icons.directions_car,
-      'shopping': Icons.shopping_bag,
-      'entertainment': Icons.movie,
-      'health': Icons.medical_services,
-      'education': Icons.school,
-      'bills': Icons.receipt_long,
-      'home': Icons.home,
-      'travel': Icons.flight,
-      'savings': Icons.savings,
-    };
-    return iconMap[budget.categoryIcon?.toLowerCase()] ?? Icons.category;
-  }
 }
 
 /// Bütçe kartları listesi

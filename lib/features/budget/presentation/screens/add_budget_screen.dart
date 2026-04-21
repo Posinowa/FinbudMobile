@@ -4,6 +4,7 @@ import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -171,9 +172,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
           value: category,
           child: Row(
             children: [
-              Text(
-                category.icon ?? '📦',
-                style: const TextStyle(fontSize: 20),
+              CategoryIconWidget(
+                icon: category.icon ?? kDefaultCategoryIcon,
+                size: 20,
               ),
               const SizedBox(width: 12),
               Text(

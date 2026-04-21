@@ -3,6 +3,7 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/budget/data/models/budget_model.dart';
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -128,9 +129,9 @@ class _EditBudgetScreenState extends ConsumerState<EditBudgetScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Text(
-                category.icon ?? '📦',
-                style: const TextStyle(fontSize: 24),
+              child: CategoryIconWidget(
+                icon: category.icon ?? kDefaultCategoryIcon,
+                size: 24,
               ),
             ),
           ),

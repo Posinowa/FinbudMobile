@@ -5,6 +5,7 @@ import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
 import 'package:finbud_app/features/category/presentation/widgets/add_category_sheet.dart';
+import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:finbud_app/features/transaction/data/models/transaction_model.dart';
 import 'package:finbud_app/features/transaction/presentation/providers/transaction_provider.dart';
 import 'package:flutter/material.dart';
@@ -443,9 +444,9 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   value: category,
                   child: Row(
                     children: [
-                      Text(
-                        category.icon ?? '📁',
-                        style: const TextStyle(fontSize: 18),
+                      CategoryIconWidget(
+                        icon: category.icon ?? kDefaultCategoryIcon,
+                        size: 20,
                       ),
                       const SizedBox(width: 12),
                       Text(
