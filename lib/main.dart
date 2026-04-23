@@ -14,8 +14,39 @@ void main() async {
   runApp(const ProviderScope(child: FinbudApp()));
 }
 
-class FinbudApp extends StatelessWidget {
+class FinbudApp extends StatefulWidget {
   const FinbudApp({super.key});
+
+  @override
+  State<FinbudApp> createState() => _FinbudAppState();
+}
+
+class _FinbudAppState extends State<FinbudApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkTokenOnResume();
+    }
+  }
+
+  Future<void> _checkTokenOnResume() async {
+    final hasToken = await AppRouter.hasValidToken();
+    if (!hasToken) {
+      await AppRouter.logout();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
