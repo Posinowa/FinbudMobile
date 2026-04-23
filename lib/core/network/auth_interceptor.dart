@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -16,9 +18,60 @@ class AuthInterceptor extends Interceptor {
 
     final accessToken = await _storage.read(key: 'access_token');
     if (accessToken != null) {
-      options.headers['Authorization'] = 'Bearer $accessToken';
+      // Proaktif yenileme: token 5 dakika içinde expire olacaksa önceden yenile
+      if (_isTokenExpiringSoon(accessToken) && !_isRefreshing) {
+        _isRefreshing = true;
+        final refreshed = await _refreshToken();
+        _isRefreshing = false;
+
+        if (refreshed) {
+          final newToken = await _storage.read(key: 'access_token');
+          options.headers['Authorization'] = 'Bearer $newToken';
+        } else {
+          await _performLogout();
+          handler.reject(DioException(
+            requestOptions: options,
+            error: 'Token yenilenemedi, oturum sonlandırıldı',
+            type: DioExceptionType.cancel,
+          ));
+          return;
+        }
+      } else {
+        options.headers['Authorization'] = 'Bearer $accessToken';
+      }
     }
     handler.next(options);
+  }
+
+  /// Token'ın exp claim'ini decode ederek 5 dakika içinde expire
+  /// olup olmadığını kontrol eder.
+  bool _isTokenExpiringSoon(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return false;
+
+      var payload = parts[1];
+      // Base64 padding normalize et
+      switch (payload.length % 4) {
+        case 2:
+          payload += '==';
+          break;
+        case 3:
+          payload += '=';
+          break;
+      }
+
+      final decoded = utf8.decode(base64Url.decode(payload));
+      final claims = json.decode(decoded) as Map<String, dynamic>;
+      final exp = claims['exp'] as int?;
+      if (exp == null) return false;
+
+      final expiryTime = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      final threshold = DateTime.now().add(const Duration(minutes: 5));
+      return expiryTime.isBefore(threshold);
+    } catch (_) {
+      return false;
+    }
   }
 
   @override
