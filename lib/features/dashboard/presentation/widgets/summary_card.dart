@@ -9,6 +9,7 @@ class SummaryCard extends StatelessWidget {
   final Color? iconColor;
   final Color? backgroundColor;
   final bool showSign;
+  final String? imagePath;
 
   const SummaryCard({
     super.key,
@@ -18,6 +19,7 @@ class SummaryCard extends StatelessWidget {
     this.iconColor,
     this.backgroundColor,
     this.showSign = false,
+    this.imagePath,
   });
 
   @override
@@ -47,11 +49,13 @@ class SummaryCard extends StatelessWidget {
                   color: (iconColor ?? AppColors.primary).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? AppColors.primary,
-                  size: 20,
-                ),
+                child: imagePath != null
+                    ? Image.asset(imagePath!, width: 20, height: 20)
+                    : Icon(
+                        icon,
+                        color: iconColor ?? AppColors.primary,
+                        size: 20,
+                      ),
               ),
               const SizedBox(width: 8),
               Text(
@@ -123,6 +127,7 @@ class DashboardSummaryCards extends StatelessWidget {
           icon: Icons.account_balance_wallet,
           iconColor: AppColors.primary,
           showSign: true,
+          imagePath: 'assets/icons/dashboard_bakiye.png',
         ),
         const SizedBox(height: 12),
         // Gelir ve Gider kartları - Yan yana

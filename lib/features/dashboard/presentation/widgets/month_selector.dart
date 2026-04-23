@@ -46,10 +46,13 @@ class MonthSelector extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.calendar_month,
-                    size: 18,
-                    color: AppColors.primary,
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: Image.asset(
+                      'assets/icons/dashboard_takvim.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Text(

@@ -54,25 +54,57 @@ class MainScaffold extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         onDestinationSelected: (index) => _onItemTapped(index, context),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
+            icon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_home.png', fit: BoxFit.contain),
+            ),
+            selectedIcon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_home.png', fit: BoxFit.contain),
+            ),
             label: 'Anasayfa',
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
+            icon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_transaction.png', fit: BoxFit.contain),
+            ),
+            selectedIcon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_transaction.png', fit: BoxFit.contain),
+            ),
             label: 'Islemler',
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet),
+            icon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_budget.png', fit: BoxFit.contain),
+            ),
+            selectedIcon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_budget.png', fit: BoxFit.contain),
+            ),
             label: 'Butceler',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outlined),
-            selectedIcon: Icon(Icons.person),
+            icon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_profile.png', fit: BoxFit.contain),
+            ),
+            selectedIcon: SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset('assets/icons/bottomnav_profile.png', fit: BoxFit.contain),
+            ),
             label: 'Profil',
           ),
         ],
