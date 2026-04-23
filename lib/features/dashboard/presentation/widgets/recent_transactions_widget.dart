@@ -95,26 +95,32 @@ class TransactionItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Text(
-                      _formatDate(transaction.date),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textHint,
-                      ),
-                    ),
                   ],
                 ),
               ],
             ),
           ),
-          // Tutar
-          Text(
-            _formatAmount(transaction.amount, transaction.isIncome),
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: transaction.isIncome ? AppColors.income : AppColors.expense,
-            ),
+          // Tutar ve tarih
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                _formatAmount(transaction.amount, transaction.isIncome),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: transaction.isIncome ? AppColors.income : AppColors.expense,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _formatDate(transaction.date),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textHint,
+                ),
+              ),
+            ],
           ),
         ],
       ),
