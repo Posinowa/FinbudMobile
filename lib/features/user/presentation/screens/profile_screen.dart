@@ -105,7 +105,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _SettingsCard(
               items: [
                 _SettingsItem(
-                  icon: Icons.category_outlined,
+                  icon: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Image.asset(
+                      'assets/icons/categories.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                   label: 'Kategoriler',
                   onTap: () => _openCategoryList(context),
                 ),
@@ -117,7 +124,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _SettingsCard(
               items: [
                 _SettingsItem(
-                  icon: Icons.lock_outline,
+                  icon: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Image.asset(
+                      'assets/icons/password.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                   label: 'Şifre Değiştir',
                   onTap: () => _showChangePasswordSheet(context),
                 ),
@@ -232,7 +246,7 @@ class _UserInfoCard extends StatelessWidget {
 // Ayarlar Kartı
 // ─────────────────────────────────────────────────────────────────────────────
 class _SettingsItem {
-  final IconData icon;
+  final Widget icon;
   final String label;
   final VoidCallback onTap;
 
@@ -270,7 +284,7 @@ class _SettingsCard extends StatelessWidget {
           return Column(
             children: [
               ListTile(
-                leading: Icon(item.icon, color: AppColors.primary),
+                leading: item.icon,
                 title: Text(
                   item.label,
                   style: const TextStyle(
