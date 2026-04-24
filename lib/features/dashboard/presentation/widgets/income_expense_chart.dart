@@ -54,7 +54,6 @@ class IncomeExpenseChart extends StatelessWidget {
                   value: income,
                   heightRatio: incomeHeight,
                   color: AppColors.income,
-                  icon: Icons.arrow_upward,
                 ),
                 const SizedBox(width: 48),
                 _buildBar(
@@ -62,7 +61,6 @@ class IncomeExpenseChart extends StatelessWidget {
                   value: expense,
                   heightRatio: expenseHeight,
                   color: AppColors.expense,
-                  icon: Icons.arrow_downward,
                 ),
               ],
             ),
@@ -79,7 +77,6 @@ class IncomeExpenseChart extends StatelessWidget {
     required double value,
     required double heightRatio,
     required Color color,
-    required IconData icon,
   }) {
     const maxBarHeight = 120.0;
     final barHeight = (heightRatio * maxBarHeight).clamp(8.0, maxBarHeight);
@@ -104,9 +101,6 @@ class IncomeExpenseChart extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Icon(icon, color: Colors.white, size: 20),
           ),
         ),
         const SizedBox(height: 12),
