@@ -66,6 +66,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       backgroundColor: AppColors.surface,
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
+      centerTitle: true,
       surfaceTintColor: Colors.transparent,
       actions: [
         // Özet bilgi badge'leri

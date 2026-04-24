@@ -86,6 +86,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen> {
       backgroundColor: AppColors.surface,
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
+      centerTitle: true,
       surfaceTintColor: Colors.transparent,
       actions: [
         Stack(
