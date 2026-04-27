@@ -43,7 +43,7 @@ class UserRepository {
       await _dio.put(
         '/users/me/password',
         data: {
-          'current_password': currentPassword,
+          'old_password': currentPassword,
           'new_password': newPassword,
         },
       );
