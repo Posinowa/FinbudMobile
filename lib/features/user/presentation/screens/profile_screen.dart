@@ -1,5 +1,6 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
+import 'package:finbud_app/core/utils/validators.dart';
 import 'package:finbud_app/features/category/presentation/screens/category_list_screen.dart';
 import 'package:finbud_app/features/user/presentation/providers/user_provider.dart';
 import 'package:finbud_app/features/user/presentation/providers/user_state.dart';
@@ -403,8 +404,8 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
                   onToggle: () => setState(() => _hideNew = !_hideNew),
                   validator: (val) {
                     if (val == null || val.isEmpty) return 'Yeni şifrenizi girin';
-                    if (val.length < 8) return 'En az 8 karakter olmalı';
-                    return null;
+                    if (val == _currentCtrl.text) return 'Yeni şifre mevcut şifreyle aynı olamaz';
+                    return Validators.validatePassword(val);
                   },
                 ),
                 const SizedBox(height: 12),
