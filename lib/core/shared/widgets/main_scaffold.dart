@@ -79,7 +79,7 @@ class MainScaffold extends StatelessWidget {
               height: 24,
               child: Image.asset('assets/icons/bottomnav_transaction.png', fit: BoxFit.contain),
             ),
-            label: 'Islemler',
+            label: 'İşlemler',
           ),
           NavigationDestination(
             icon: SizedBox(
@@ -92,7 +92,7 @@ class MainScaffold extends StatelessWidget {
               height: 24,
               child: Image.asset('assets/icons/bottomnav_budget.png', fit: BoxFit.contain),
             ),
-            label: 'Butceler',
+            label: 'Bütçeler',
           ),
           NavigationDestination(
             icon: SizedBox(

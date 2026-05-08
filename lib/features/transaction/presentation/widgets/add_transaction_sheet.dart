@@ -456,7 +456,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                    ],
+                    ],   
                   ),
                 );
               }).toList(),

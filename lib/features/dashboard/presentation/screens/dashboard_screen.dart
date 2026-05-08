@@ -91,7 +91,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         children: [
           if (state.hasError)
             _DashboardErrorBanner(
-              message: state.errorMessage ?? 'Bir hata olustu',
+              message: state.errorMessage ?? 'Bir hata oluştu',
               onRetry: () => ref.read(dashboardProvider.notifier).refresh(),
             ),
           Expanded(
@@ -122,13 +122,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             expense: summary.totalExpense,
                           ),
                           const SizedBox(height: 24),
-                          const _SectionTitle('Butceler'),
+                          const _SectionTitle('Bütçeler'),
                           const SizedBox(height: 12),
                           BudgetCardList(
                             budgets: ref.watch(budgetListProvider),
                           ),
                           const SizedBox(height: 24),
-                          const _SectionTitle('Son islemler'),
+                          const _SectionTitle('Son işlemler'),
                           const SizedBox(height: 12),
                           RecentTransactionsList(
                             transactions: ref.watch(recentTransactionsProvider),

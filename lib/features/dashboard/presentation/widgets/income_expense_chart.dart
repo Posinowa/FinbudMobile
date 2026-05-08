@@ -35,7 +35,7 @@ class IncomeExpenseChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Gelir - Gider Karşılaştırması',
+            'Gelir - Gider',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
