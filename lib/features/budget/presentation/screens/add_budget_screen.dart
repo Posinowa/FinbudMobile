@@ -27,6 +27,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   CategoryModel? _selectedCategory;
   late String _selectedMonth;
   bool _isLoading = false;
+  bool _isRecurring = false;
 
   @override
   void initState() {
@@ -97,8 +98,13 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             const SizedBox(height: 12),
             _buildMonthSelector(),
             
+            const SizedBox(height: 28),
+
+            // Tekrarlayan Bütçe Seçeneği
+            _buildRecurringToggle(),
+
             const SizedBox(height: 40),
-            
+
             // Kaydet Butonu
             _buildSaveButton(),
           ],
@@ -294,6 +300,64 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     );
   }
 
+  Widget _buildRecurringToggle() {
+    return GestureDetector(
+      onTap: () => setState(() => _isRecurring = !_isRecurring),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: _isRecurring
+              ? AppColors.primary.withOpacity(0.06)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isRecurring ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Her ay otomatik tekrarla',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: _isRecurring
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _isRecurring
+                        ? 'Bu bütçe her ay başında otomatik oluşturulacak'
+                        : 'Bu bütçe yalnızca seçili ay için geçerli olacak',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Checkbox(
+              value: _isRecurring,
+              onChanged: (val) =>
+                  setState(() => _isRecurring = val ?? false),
+              activeColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSaveButton() {
     return SizedBox(
       width: double.infinity,
@@ -372,6 +436,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         categoryId: _selectedCategory!.id,
         limit: double.parse(_limitController.text),
         month: _selectedMonth,
+        isRecurring: _isRecurring,
       );
 
       if (!mounted) return;

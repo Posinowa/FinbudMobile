@@ -44,6 +44,7 @@ class BudgetRepository {
     required String categoryId,
     required double limit,
     required String month,
+    bool isRecurring = false,
   }) async {
     try {
       final response = await _dio.post(
@@ -52,6 +53,7 @@ class BudgetRepository {
           'category_id': categoryId,
           'limit': limit,
           'month': month,
+          'is_recurring': isRecurring,
         },
       );
       return response.data as Map<String, dynamic>;

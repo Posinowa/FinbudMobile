@@ -37,6 +37,7 @@ class BudgetModel extends Equatable {
   final double spent;
   final double remaining;
   final double percentUsed;
+  final bool isRecurring;
 
   const BudgetModel({
     required this.id,
@@ -45,6 +46,7 @@ class BudgetModel extends Equatable {
     required this.spent,
     required this.remaining,
     required this.percentUsed,
+    this.isRecurring = false,
   });
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class BudgetModel extends Equatable {
       spent: (json['spent'] as num).toDouble(),
       remaining: (json['remaining'] as num).toDouble(),
       percentUsed: (json['percent_used'] as num).toDouble(),
+      isRecurring: json['is_recurring'] as bool? ?? false,
     );
   }
 
@@ -74,7 +77,7 @@ class BudgetModel extends Equatable {
   double get fullProgressValue => percentUsed / 100;
 
   @override
-  List<Object?> get props => [id, category, limit, spent, remaining, percentUsed];
+  List<Object?> get props => [id, category, limit, spent, remaining, percentUsed, isRecurring];
 }
 
 /// Budget listesi response - Backend BudgetListResponse yapısına uygun

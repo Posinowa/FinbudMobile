@@ -254,23 +254,26 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
     required String categoryId,
     required double limit,
     required String month,
+    bool isRecurring = false,
   }) async {
     if (_useMock) {
       return _createBudgetMock(categoryId, limit, month);
     }
-    return _createBudgetApi(categoryId, limit, month);
+    return _createBudgetApi(categoryId, limit, month, isRecurring);
   }
 
   Future<bool> _createBudgetApi(
     String categoryId,
     double limit,
     String month,
+    bool isRecurring,
   ) async {
     try {
       final response = await _repository!.createBudget(
         categoryId: categoryId,
         limit: limit,
         month: month,
+        isRecurring: isRecurring,
       );
 
       // Başarılı ise listeyi yenile (aynı ay için)
