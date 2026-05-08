@@ -151,11 +151,7 @@ final totalExpenseProvider = Provider<double>((ref) {
 });
 
 final budgetListProvider = Provider<List<BudgetSummary>>((ref) {
-  final budgets = List<BudgetSummary>.from(
-    ref.watch(dashboardProvider).summary?.budgets ?? [],
-  );
-  budgets.sort((a, b) => b.usagePercentage.compareTo(a.usagePercentage));
-  return budgets;
+  return ref.watch(dashboardProvider).summary?.budgets ?? [];
 });
 
 final recentTransactionsProvider = Provider<List<RecentTransaction>>((ref) {
