@@ -4,6 +4,7 @@ import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/features/category/data/models/category_model.dart';
 import 'package:finbud_app/features/category/presentation/providers/category_provider.dart';
+import 'package:finbud_app/features/category/presentation/widgets/add_category_sheet.dart';
 import 'package:finbud_app/features/category/presentation/widgets/category_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -185,40 +186,88 @@ class _UserCategoriesTab extends ConsumerWidget {
 
   const _UserCategoriesTab({required this.categories});
 
+  void _openAddCategorySheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const AddCategorySheet(initialType: 'expense'),
+    );
+  }
+
+  Widget _buildAddButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _openAddCategorySheet(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.add, size: 14, color: AppColors.primary),
+            SizedBox(width: 4),
+            Text(
+              'Kategori Ekle',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (categories.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.category_outlined,
-                size: 56,
-                color: AppColors.textHint,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Henüz kendi kategoriniz yok',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppColors.textSecondary,
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [_buildAddButton(context)],
+            ),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(
+                      Icons.category_outlined,
+                      size: 56,
+                      color: AppColors.textHint,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Henüz kendi kategoriniz yok',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '"Kategori Ekle" butonuyla\nkendi kategorilerinizi oluşturabilirsiniz.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textHint,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Gelir/Gider ekleme ekranındaki\n"Kategori Ekle" butonuyla\nkendi kategorilerinizi oluşturabilirsiniz.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textHint,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
@@ -229,6 +278,11 @@ class _UserCategoriesTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [_buildAddButton(context)],
+        ),
+        const SizedBox(height: 12),
         if (incomeCategories.isNotEmpty) ...[
           _SectionHeader(
             label: 'Gelir',
