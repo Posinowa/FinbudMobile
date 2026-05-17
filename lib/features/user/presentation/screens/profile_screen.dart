@@ -1,11 +1,12 @@
 import 'package:finbud_app/core/constants/app_color.dart';
+import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
 import 'package:finbud_app/core/utils/validators.dart';
-import 'package:finbud_app/features/category/presentation/screens/category_list_screen.dart';
 import 'package:finbud_app/features/user/presentation/providers/user_provider.dart';
 import 'package:finbud_app/features/user/presentation/providers/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -149,11 +150,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _openCategoryList(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const CategoryListScreen(),
-      ),
-    );
+    context.push(AppRoutes.categories);
   }
 
   void _showChangePasswordSheet(BuildContext context) {

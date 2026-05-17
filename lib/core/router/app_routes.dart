@@ -9,4 +9,5 @@ class AppRoutes {
   static const String addBudget = '/budget/add'; 
   static const String editBudget = '/budget/edit';
   static const String profile = '/profile';
+  static const String categories = '/profile/categories';
 }

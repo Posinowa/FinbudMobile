@@ -6,6 +6,7 @@ import 'package:finbud_app/features/budget/data/models/budget_model.dart';
 import 'package:finbud_app/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:finbud_app/features/budget/presentation/screens/budget_screen.dart';
 import 'package:finbud_app/features/budget/presentation/screens/edit_budget_screen.dart';
+import 'package:finbud_app/features/category/presentation/screens/category_list_screen.dart';
 import 'package:finbud_app/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:finbud_app/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:finbud_app/features/user/presentation/screens/profile_screen.dart';
@@ -139,6 +140,13 @@ class AppRouter {
           pageBuilder: (context, state) => const NoTransitionPage(
             child: ProfileScreen(),
           ),
+          routes: [
+            GoRoute(
+              path: 'categories',
+              name: 'categories',
+              builder: (context, state) => const CategoryListScreen(),
+            ),
+          ],
         ),
       ],
     ),
