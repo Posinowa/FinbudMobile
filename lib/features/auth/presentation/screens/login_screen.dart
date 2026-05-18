@@ -27,6 +27,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _handleGoogleLogin() async {
+    final success = await ref.read(authProvider.notifier).loginWithGoogle();
+    if (!mounted) return;
+    if (success) {
+      context.go(AppRoutes.dashboard);
+    }
+  }
+
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       final success = await ref.read(authProvider.notifier).login(
@@ -271,6 +279,65 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+
+                  // Divider
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(color: AppColors.border, thickness: 1),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'veya',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(color: AppColors.border, thickness: 1),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Google Sign-In Button
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: isLoading ? null : _handleGoogleLogin,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: Colors.white,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/icons/google_logo.png',
+                            height: 22,
+                            width: 22,
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Google ile Devam Et',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -280,3 +347,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
+

@@ -77,6 +77,60 @@ class AuthRepository {
     }
   }
 
+  Future<Map<String, dynamic>> loginWithGoogle({
+    required String idToken,
+  }) async {
+    try {
+      final response = await DioClient.instance.post(
+        '/auth/google',
+        data: {'id_token': idToken},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        await _storage.write(key: 'access_token', value: data['access_token']);
+        await _storage.write(
+            key: 'refresh_token', value: data['refresh_token']);
+
+        return {
+          'success': true,
+          'access_token': data['access_token'],
+          'refresh_token': data['refresh_token'],
+        };
+      }
+
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu'};
+    } on DioException catch (e) {
+      String errorMessage;
+
+      if (e.response != null) {
+        switch (e.response!.statusCode) {
+          case 401:
+            errorMessage = 'Google ile giriş başarısız';
+            break;
+          case 500:
+            errorMessage = 'Sunucu hatası, lütfen daha sonra tekrar deneyin';
+            break;
+          default:
+            errorMessage =
+                e.response?.data?['message'] ?? 'Google girişi başarısız';
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Bağlantı zaman aşımına uğradı';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'İnternet bağlantınızı kontrol edin';
+      } else {
+        errorMessage = 'Bağlantı hatası oluştu';
+      }
+
+      return {'success': false, 'error': errorMessage};
+    } catch (e) {
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu: $e'};
+    }
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1048418570560-7ngau595e6qdnjmvri6d0skhhf8fngoo.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1048418570560-7ngau595e6qdnjmvri6d0skhhf8fngoo</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDyt_mepV2BD9Ts5aLe8cNphj2szb3E5k4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1048418570560</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.finbud.finbudApp</string>
+	<key>PROJECT_ID</key>
+	<string>finbud-1aa0e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>finbud-1aa0e.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1048418570560:ios:ad862ac904abb4ea492aa5</string>
+</dict>
+</plist>

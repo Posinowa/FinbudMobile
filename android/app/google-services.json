@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1048418570560",
+    "project_id": "finbud-1aa0e",
+    "storage_bucket": "finbud-1aa0e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048418570560:android:2d00c4aa00e866a4492aa5",
+        "android_client_info": {
+          "package_name": "com.finbud.finbud_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCwy4wTfYH0thY75k0AYPdh6RNItiP5oc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

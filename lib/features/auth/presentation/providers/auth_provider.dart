@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/services/google_sign_in_service.dart';
 import '../../domain/models/auth_state.dart';
 
 // Repository provider
@@ -43,8 +44,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> loginWithGoogle() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    // Google sign-in akışını başlat
+    final idToken = await GoogleSignInService.signIn();
+
+    if (idToken == null) {
+      // Kullanıcı iptal etti
+      state = state.copyWith(isLoading: false);
+      return false;
+    }
+
+    final result = await _repository.loginWithGoogle(idToken: idToken);
+
+    if (result['success'] == true) {
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: true,
+        accessToken: result['access_token'],
+        refreshToken: result['refresh_token'],
+      );
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: false,
+        errorMessage: result['error'],
+      );
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await _repository.logout();
+    await GoogleSignInService.signOut();
     state = const AuthState();
   }
 
