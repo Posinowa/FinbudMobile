@@ -1,9 +1,13 @@
 
+import 'dart:io';
+
 import '../../../../core/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_color.dart';
+import '../../../../core/providers/update_provider.dart';
 import '../../domain/models/dashboard_summary.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/budget_card.dart';
@@ -89,6 +93,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Güncelleme banner'ı
+          const _UpdateBanner(),
           if (state.hasError)
             _DashboardErrorBanner(
               message: state.errorMessage ?? 'Bir hata oluştu',
@@ -191,6 +197,108 @@ class _SectionTitle extends StatelessWidget {
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
       ),
+    );
+  }
+}
+
+class _UpdateBanner extends ConsumerWidget {
+  const _UpdateBanner();
+
+  // Play Store veya App Store'u açar
+  Future<void> _openStore(String? androidUrl, String? iosUrl) async {
+    try {
+      if (Platform.isAndroid) {
+        // Önce Play Store uygulamasını dene (market:// scheme)
+        const packageName = 'com.finbud.finbud_app';
+        final marketUri = Uri.parse('market://details?id=$packageName');
+        if (await canLaunchUrl(marketUri)) {
+          await launchUrl(marketUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+        // Play Store uygulaması yoksa web URL'ye düş
+        final webUrl = androidUrl?.isNotEmpty == true
+            ? androidUrl!
+            : 'https://play.google.com/store/apps/details?id=$packageName';
+        await launchUrl(Uri.parse(webUrl),
+            mode: LaunchMode.externalApplication);
+      } else if (Platform.isIOS) {
+        final url = iosUrl?.isNotEmpty == true ? iosUrl! : '';
+        if (url.isEmpty) return;
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dismissed = ref.watch(updateBannerDismissedProvider);
+    if (dismissed) return const SizedBox.shrink();
+
+    final statusAsync = ref.watch(updateStatusProvider);
+
+    return statusAsync.when(
+      data: (status) {
+        if (!status.updateAvailable) return const SizedBox.shrink();
+
+        // Platform'a göre store URL'si belirle
+        final hasStoreUrl = Platform.isIOS
+            ? (status.iosStoreUrl?.isNotEmpty == true)
+            : true; // Android'de market:// her zaman çalışır
+
+        return Material(
+          color: AppColors.primary.withOpacity(0.08),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+            child: Row(
+              children: [
+                const Icon(Icons.system_update_outlined,
+                    size: 20, color: AppColors.primary),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Yeni güncelleme mevcut!',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                if (hasStoreUrl)
+                  TextButton(
+                    onPressed: () => _openStore(
+                      status.androidStoreUrl,
+                      status.iosStoreUrl,
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'Güncelle',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.close,
+                      size: 18, color: AppColors.textSecondary),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => ref
+                      .read(updateBannerDismissedProvider.notifier)
+                      .state = true,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
