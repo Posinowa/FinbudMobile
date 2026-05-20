@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/network/connectivity_provider.dart';
 import 'package:finbud_app/core/network/maintenance_service.dart';
@@ -30,12 +33,39 @@ class FinbudApp extends ConsumerStatefulWidget {
 
 class _FinbudAppState extends ConsumerState<FinbudApp> with WidgetsBindingObserver {
   late final Future<_InitResult> _initFuture;
+  final _appLinks = AppLinks();
+  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initFuture = _initialize();
+    _initDeepLinks();
+  }
+
+  void _initDeepLinks() {
+    // Uygulama açıkken gelen linkler
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+
+    // Uygulama kapalıyken tıklanan link ile açılma
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) _handleDeepLink(uri);
+    });
+  }
+
+  void _handleDeepLink(Uri uri) {
+    if (uri.scheme == 'finbud' && uri.host == 'reset-password') {
+      final token = uri.queryParameters['token'] ?? '';
+      if (token.isNotEmpty) {
+        // Router hazır olana kadar kısa bekle
+        Future.delayed(const Duration(milliseconds: 300), () {
+          AppRouter.router.go('/reset-password?token=$token');
+        });
+      }
+    }
   }
 
   Future<_InitResult> _initialize() async {
@@ -48,6 +78,7 @@ class _FinbudAppState extends ConsumerState<FinbudApp> with WidgetsBindingObserv
 
   @override
   void dispose() {
+    _linkSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -60,6 +91,12 @@ class _FinbudAppState extends ConsumerState<FinbudApp> with WidgetsBindingObserv
   }
 
   Future<void> _checkTokenOnResume() async {
+    // Şifre sıfırlama ekranındayken login'e yönlendirme — kullanıcı giriş yapmamış olabilir
+    try {
+      final currentPath = AppRouter.router.routeInformationProvider.value.uri.path;
+      if (currentPath.startsWith('/reset-password')) return;
+    } catch (_) {}
+
     final hasToken = await AppRouter.hasValidToken();
     if (!hasToken) {
       await AppRouter.logout();

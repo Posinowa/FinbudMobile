@@ -1,7 +1,9 @@
 import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:finbud_app/core/shared/widgets/main_scaffold.dart';
+import 'package:finbud_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:finbud_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:finbud_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:finbud_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:finbud_app/features/budget/data/models/budget_model.dart';
 import 'package:finbud_app/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:finbud_app/features/budget/presentation/screens/budget_screen.dart';
@@ -49,8 +51,14 @@ class AppRouter {
     final token = await _storage.read(key: _accessTokenKey);
     final isLoggedIn = token != null && token.isNotEmpty;
 
+    // Şifre sıfırlama ekranı her zaman erişilebilir (giriş durumundan bağımsız)
+    if (state.matchedLocation == AppRoutes.resetPassword) {
+      return null;
+    }
+
     final isAuthRoute = state.matchedLocation == AppRoutes.login ||
-        state.matchedLocation == AppRoutes.register;
+        state.matchedLocation == AppRoutes.register ||
+        state.matchedLocation == AppRoutes.forgotPassword;
 
     if (!isLoggedIn && !isAuthRoute) {
       return AppRoutes.login;
@@ -86,6 +94,19 @@ class AppRouter {
       path: AppRoutes.register,
       name: 'register',
       builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.forgotPassword,
+      name: 'forgotPassword',
+      builder: (context, state) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.resetPassword,
+      name: 'resetPassword',
+      builder: (context, state) {
+        final token = state.uri.queryParameters['token'] ?? '';
+        return ResetPasswordScreen(token: token);
+      },
     ),
 
     // Main routes - bottom nav bar VAR
