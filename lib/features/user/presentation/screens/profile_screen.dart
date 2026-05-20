@@ -143,6 +143,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
             // ── Çıkış yap ────────────────────────────────────────────
             _LogoutButton(),
+            const SizedBox(height: 12),
+
+            // ── Hesabı sil ───────────────────────────────────────────
+            _DeleteAccountButton(),
           ],
         ),
       ),
@@ -534,6 +538,100 @@ class _LogoutButton extends ConsumerWidget {
               'Çıkış Yap',
               style: TextStyle(
                 color: AppColors.danger,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hesabı Sil Butonu
+// ─────────────────────────────────────────────────────────────────────────────
+class _DeleteAccountButton extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(userProvider).isUpdating;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton.icon(
+        onPressed: isLoading ? null : () => _confirmDelete(context, ref),
+        icon: isLoading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(Icons.delete_forever_outlined, color: Colors.white),
+        label: const Text(
+          'Hesabı Sil',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.error,
+          disabledBackgroundColor: AppColors.error.withOpacity(0.6),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 22),
+            SizedBox(width: 8),
+            Text(
+              'Hesabı Sil',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Hesabınız ve tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz.\n\nDevam etmek istiyor musunuz?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Vazgeç'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final success =
+                  await ref.read(userProvider.notifier).deleteAccount();
+              if (!success && ctx.mounted) {
+                AppSnackBar.showError(
+                  ctx,
+                  ref.read(userProvider).errorMessage ??
+                      'Hesap silinemedi, tekrar deneyin',
+                );
+              }
+            },
+            child: const Text(
+              'Evet, Sil',
+              style: TextStyle(
+                color: AppColors.error,
                 fontWeight: FontWeight.w600,
               ),
             ),

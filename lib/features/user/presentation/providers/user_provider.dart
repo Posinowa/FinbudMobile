@@ -82,6 +82,27 @@ class UserNotifier extends StateNotifier<UserState> {
     }
   }
 
+  /// DELETE /users/me — hesabı kalıcı olarak sil
+  Future<bool> deleteAccount() async {
+    state = state.copyWith(isUpdating: true, clearError: true);
+    try {
+      await _repository.deleteAccount();
+      _ref.invalidate(categoryProvider);
+      _ref.invalidate(transactionProvider);
+      _ref.invalidate(budgetProvider);
+      _ref.invalidate(dashboardProvider);
+      state = UserState.initial();
+      await AppRouter.logout();
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isUpdating: false,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
   /// Çıkış yap — token'ları sil, tüm provider'ları sıfırla, login'e yönlendir
   Future<void> logout() async {
     _ref.invalidate(categoryProvider);

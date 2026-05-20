@@ -52,6 +52,15 @@ class UserRepository {
     }
   }
 
+  /// DELETE /users/me — hesabı kalıcı olarak sil
+  Future<void> deleteAccount() async {
+    try {
+      await _dio.delete('/users/me');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Exception _handleError(DioException e) {
     if (e.response != null) {
       final data = e.response!.data;
