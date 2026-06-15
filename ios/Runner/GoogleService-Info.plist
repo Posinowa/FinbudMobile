@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1048418570560-7ngau595e6qdnjmvri6d0skhhf8fngoo.apps.googleusercontent.com</string>
+	<string>1048418570560-6gdut5dp98tihud7un2lr7tm50eegi1f.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1048418570560-7ngau595e6qdnjmvri6d0skhhf8fngoo</string>
+	<string>com.googleusercontent.apps.1048418570560-6gdut5dp98tihud7un2lr7tm50eegi1f</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDyt_mepV2BD9Ts5aLe8cNphj2szb3E5k4</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.finbud.finbudApp</string>
+	<string>com.pasinowa.finbud</string>
 	<key>PROJECT_ID</key>
 	<string>finbud-1aa0e</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1048418570560:ios:ad862ac904abb4ea492aa5</string>
+	<string>1:1048418570560:ios:d31792e145b3dfec492aa5</string>
 </dict>
 </plist>

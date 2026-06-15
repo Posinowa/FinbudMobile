@@ -3,7 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 class GoogleSignInService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     // iOS client ID — Info.plist'teki GIDClientID ile aynı olmalı
-    clientId: '1048418570560-7ngau595e6qdnjmvri6d0skhhf8fngoo.apps.googleusercontent.com',
+    clientId: '1048418570560-6gdut5dp98tihud7un2lr7tm50eegi1f.apps.googleusercontent.com',
     // Web/server client ID — backend'e gönderilen ID token için
     serverClientId: '197224562444-4jrgp0ng8vs9el2rvenc93o0qaff09c4.apps.googleusercontent.com',
     scopes: ['email', 'profile'],
