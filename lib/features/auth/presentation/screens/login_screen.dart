@@ -56,7 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _handleForgotPassword() {
-    AppSnackBar.showInfo(context, 'Şifre sıfırlama özelliği yakında');
+    context.push(AppRoutes.forgotPassword);
   }
 
   @override
