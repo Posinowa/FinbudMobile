@@ -31,22 +31,28 @@ class MaintenanceService {
   /// API'den uygulama durumunu kontrol eder.
   static Future<AppStatus> checkStatus() async {
     try {
+      final baseUrl = dotenv.env['API_BASE_URL'] ?? '';
+      print('[Maintenance] API_BASE_URL: $baseUrl');
+
       final dio = Dio(
         BaseOptions(
-          baseUrl: dotenv.env['API_BASE_URL'] ?? '',
+          baseUrl: baseUrl,
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
         ),
       );
 
       final response = await dio.get('/status');
+      print('[Maintenance] response: ${response.data}');
 
       if (response.statusCode == 200) {
         return AppStatus.fromJson(response.data as Map<String, dynamic>);
       }
 
+      print('[Maintenance] unexpected status code: ${response.statusCode}');
       return AppStatus.maintenance();
-    } catch (_) {
+    } catch (e) {
+      print('[Maintenance] HATA: $e');
       return AppStatus.maintenance();
     }
   }

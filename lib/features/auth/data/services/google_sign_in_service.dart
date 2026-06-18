@@ -17,11 +17,18 @@ class GoogleSignInService {
       await _googleSignIn.signOut();
 
       final account = await _googleSignIn.signIn();
-      if (account == null) return null;
+      if (account == null) {
+        print('[GoogleSignIn] account null — kullanıcı iptal etti');
+        return null;
+      }
 
+      print('[GoogleSignIn] account alındı: ${account.email}');
       final auth = await account.authentication;
+      print('[GoogleSignIn] idToken: ${auth.idToken != null ? "VAR" : "NULL"}');
+      print('[GoogleSignIn] accessToken: ${auth.accessToken != null ? "VAR" : "NULL"}');
       return auth.idToken;
     } catch (e) {
+      print('[GoogleSignIn] HATA: $e');
       return null;
     }
   }

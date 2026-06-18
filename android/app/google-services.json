@@ -50,6 +50,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1048418570560-9mf2vigl3st0kj34962dvicf0r9ee6tj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pasinowa.finbud",
+            "certificate_hash": "4a9a098347e66946d13fbabe8f970c47c80f932a"
+          }
+        },
+        {
           "client_id": "1048418570560-h0b2vam3kds8cfqbp3q5po18m0ovqu7q.apps.googleusercontent.com",
           "client_type": 3
         }
