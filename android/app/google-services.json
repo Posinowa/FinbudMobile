@@ -12,7 +12,12 @@
           "package_name": "com.finbud.finbud_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1048418570560-h0b2vam3kds8cfqbp3q5po18m0ovqu7q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBCwy4wTfYH0thY75k0AYPdh6RNItiP5oc"
@@ -20,7 +25,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1048418570560-h0b2vam3kds8cfqbp3q5po18m0ovqu7q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1048418570560-6gdut5dp98tihud7un2lr7tm50eegi1f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pasinowa.finbud"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048418570560:android:840604d80a42eeaf492aa5",
+        "android_client_info": {
+          "package_name": "com.pasinowa.finbud"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1048418570560-h0b2vam3kds8cfqbp3q5po18m0ovqu7q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCwy4wTfYH0thY75k0AYPdh6RNItiP5oc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1048418570560-h0b2vam3kds8cfqbp3q5po18m0ovqu7q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1048418570560-6gdut5dp98tihud7un2lr7tm50eegi1f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pasinowa.finbud"
+              }
+            }
+          ]
         }
       }
     }

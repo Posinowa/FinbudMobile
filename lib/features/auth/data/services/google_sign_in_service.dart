@@ -4,6 +4,8 @@ class GoogleSignInService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
     // iOS client ID — Info.plist'teki GIDClientID ile aynı olmalı
     clientId: '1048418570560-6gdut5dp98tihud7un2lr7tm50eegi1f.apps.googleusercontent.com',
+    // Web client ID — iOS ve Android için idToken üretiminde kullanılır (aynı Firebase projesi)
+    serverClientId: '1048418570560-h0b2vam3kds8cfqbp3q5po18m0ovqu7q.apps.googleusercontent.com',
     scopes: ['email', 'profile'],
   );
 
