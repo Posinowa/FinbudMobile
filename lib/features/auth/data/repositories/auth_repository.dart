@@ -131,6 +131,113 @@ class AuthRepository {
     }
   }
 
+  Future<Map<String, dynamic>> loginWithApple({
+    required String identityToken,
+    required String email,
+    required String fullName,
+  }) async {
+    try {
+      final response = await DioClient.instance.post(
+        '/auth/apple',
+        data: {
+          'identity_token': identityToken,
+          'email': email,
+          'full_name': fullName,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        await _storage.write(key: 'access_token', value: data['access_token']);
+        await _storage.write(key: 'refresh_token', value: data['refresh_token']);
+
+        return {
+          'success': true,
+          'access_token': data['access_token'],
+          'refresh_token': data['refresh_token'],
+        };
+      }
+
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu'};
+    } on DioException catch (e) {
+      String errorMessage;
+
+      if (e.response != null) {
+        switch (e.response!.statusCode) {
+          case 401:
+            errorMessage = 'Apple ile giriş başarısız';
+            break;
+          case 500:
+            errorMessage = 'Sunucu hatası, lütfen daha sonra tekrar deneyin';
+            break;
+          default:
+            errorMessage =
+                e.response?.data?['message'] ?? 'Apple girişi başarısız';
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = 'Bağlantı zaman aşımına uğradı';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'İnternet bağlantınızı kontrol edin';
+      } else {
+        errorMessage = 'Bağlantı hatası oluştu';
+      }
+
+      return {'success': false, 'error': errorMessage};
+    } catch (e) {
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      final response = await DioClient.instance.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+      );
+      if (response.statusCode == 200) {
+        return {'success': true};
+      }
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu'};
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError) {
+        return {'success': false, 'error': 'İnternet bağlantınızı kontrol edin'};
+      }
+      return {'success': false, 'error': 'Bir hata oluştu, tekrar deneyin'};
+    } catch (e) {
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu'};
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await DioClient.instance.post(
+        '/auth/reset-password',
+        data: {'token': token, 'new_password': newPassword},
+      );
+      if (response.statusCode == 200) {
+        return {'success': true};
+      }
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu'};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        return {'success': false, 'error': 'Bağlantı geçersiz veya süresi dolmuş'};
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return {'success': false, 'error': 'İnternet bağlantınızı kontrol edin'};
+      }
+      return {'success': false, 'error': 'Bir hata oluştu, tekrar deneyin'};
+    } catch (e) {
+      return {'success': false, 'error': 'Beklenmeyen bir hata oluştu'};
+    }
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');

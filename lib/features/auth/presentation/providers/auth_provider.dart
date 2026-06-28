@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/services/google_sign_in_service.dart';
+import '../../data/services/apple_sign_in_service.dart';
 import '../../domain/models/auth_state.dart';
 
 // Repository provider
@@ -71,6 +72,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         isAuthenticated: false,
         errorMessage: result['error'],
+      );
+      return false;
+    }
+  }
+
+  Future<bool> loginWithApple() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await AppleSignInService.signIn();
+
+    if (result == null) {
+      // Kullanıcı iptal etti
+      state = state.copyWith(isLoading: false);
+      return false;
+    }
+
+    final response = await _repository.loginWithApple(
+      identityToken: result.identityToken,
+      email: result.email,
+      fullName: result.fullName,
+    );
+
+    if (response['success'] == true) {
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: true,
+        accessToken: response['access_token'],
+        refreshToken: response['refresh_token'],
+      );
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: false,
+        errorMessage: response['error'],
       );
       return false;
     }

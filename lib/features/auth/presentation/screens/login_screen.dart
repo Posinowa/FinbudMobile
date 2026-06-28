@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/router/app_routes.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
@@ -5,6 +7,7 @@ import 'package:finbud_app/features/auth/presentation/providers/auth_provider.da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../../core/utils/validators.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -29,6 +32,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleGoogleLogin() async {
     final success = await ref.read(authProvider.notifier).loginWithGoogle();
+    if (!mounted) return;
+    if (success) {
+      context.go(AppRoutes.dashboard);
+    }
+  }
+
+  Future<void> _handleAppleLogin() async {
+    final success = await ref.read(authProvider.notifier).loginWithApple();
     if (!mounted) return;
     if (success) {
       context.go(AppRoutes.dashboard);
@@ -337,6 +348,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ),
+
+                  // Apple Sign-In Button — sadece iOS'ta görünür
+                  if (Platform.isIOS) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 52,
+                      child: SignInWithAppleButton(
+                        onPressed: isLoading ? () {} : _handleAppleLogin,
+                        style: SignInWithAppleButtonStyle.black,
+                        borderRadius: BorderRadius.circular(12),
+                        text: 'Apple ile Devam Et',
+                      ),
+                    ),
+                  ],
+
                   const SizedBox(height: 24),
                 ],
               ),

@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/budget_provider.dart';
 
-/// KAN-88: Budget düzenleme ekranı
+///  Budget düzenleme ekranı
 /// Mevcut budget verilerini form'a doldurur ve PUT /budgets/{id} ile günceller
 class EditBudgetScreen extends ConsumerStatefulWidget {
   final BudgetModel budget;
