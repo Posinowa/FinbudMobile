@@ -7,6 +7,7 @@ import 'package:finbud_app/features/user/presentation/providers/user_state.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -147,6 +148,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
             // ── Hesabı sil ───────────────────────────────────────────
             _DeleteAccountButton(),
+            const SizedBox(height: 32),
+
+            // ── Yasal bağlantılar ─────────────────────────────────────
+            _LegalLinks(),
           ],
         ),
       ),
@@ -638,6 +643,64 @@ class _DeleteAccountButton extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Yasal Bağlantılar
+// ─────────────────────────────────────────────────────────────────────────────
+class _LegalLinks extends StatelessWidget {
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => _launchUrl(
+                'https://sites.google.com/view/finbudprivacy-policy',
+              ),
+              child: const Text(
+                'Gizlilik Politikası',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                '·',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _launchUrl(
+                'https://sites.google.com/view/finbudkullanim-kosullari',
+              ),
+              child: const Text(
+                'Kullanım Koşulları',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:finbud_app/core/constants/app_color.dart';
 import 'package:finbud_app/core/utils/app_snackbar.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_client.dart';
 
@@ -50,6 +52,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return 'Ad Soyad en az 2 karakter olmalı';
     }
     return null;
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   Future<void> _handleRegister() async {
@@ -260,6 +269,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Terms and Conditions Checkbox
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(
                         height: 24,
@@ -277,32 +287,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() => _acceptTerms = !_acceptTerms);
-                          },
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textSecondary,
-                              ),
-                              children: [
-                                const TextSpan(text: 'Okudum, '),
-                                TextSpan(
-                                  text: 'Kullanım Koşulları',
-                                  style: TextStyle(
-                                    color: AppColors.secondary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const TextSpan(text: '\'nı kabul ediyorum'),
-                              ],
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
                             ),
+                            children: [
+                              TextSpan(
+                                text: 'Okudum, ',
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    setState(() => _acceptTerms = !_acceptTerms);
+                                  },
+                              ),
+                              TextSpan(
+                                text: 'Kullanım Koşulları',
+                                style: TextStyle(
+                                  color: AppColors.secondary,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.secondary,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () => _launchUrl(
+                                        'https://sites.google.com/view/finbudkullanim-kosullari',
+                                      ),
+                              ),
+                              TextSpan(
+                                text: '\'nı kabul ediyorum',
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    setState(() => _acceptTerms = !_acceptTerms);
+                                  },
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Gizlilik Politikası linki
+                  Center(
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                        children: [
+                          const TextSpan(text: 'Verilerinin nasıl kullanıldığını öğrenmek için '),
+                          TextSpan(
+                            text: 'Gizlilik Politikası',
+                            style: TextStyle(
+                              color: AppColors.secondary,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
+                              decorationColor: AppColors.secondary,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => _launchUrl(
+                                    'https://sites.google.com/view/finbudprivacy-policy',
+                                  ),
+                          ),
+                          const TextSpan(text: '\'mızı okuyun.'),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
 
