@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AppleSignInService {
@@ -15,7 +16,7 @@ class AppleSignInService {
       // identityToken her zaman gelmeli
       final identityToken = credential.identityToken;
       if (identityToken == null) {
-        print('[AppleSignIn] identityToken null');
+        debugPrint('[AppleSignIn] identityToken null');
         return null;
       }
 
@@ -25,7 +26,7 @@ class AppleSignInService {
       final familyName = credential.familyName ?? '';
       final fullName = [givenName, familyName].where((s) => s.isNotEmpty).join(' ');
 
-      print('[AppleSignIn] giriş başarılı — email: ${email.isNotEmpty ? email : "(boş, sonraki giriş)"}');
+      debugPrint('[AppleSignIn] giriş başarılı');
 
       return AppleSignInResult(
         identityToken: identityToken,
@@ -34,13 +35,13 @@ class AppleSignInService {
       );
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {
-        print('[AppleSignIn] kullanıcı iptal etti');
+        debugPrint('[AppleSignIn] kullanıcı iptal etti');
       } else {
-        print('[AppleSignIn] HATA: ${e.code} — ${e.message}');
+        debugPrint('[AppleSignIn] HATA: ${e.code}');
       }
       return null;
     } catch (e) {
-      print('[AppleSignIn] beklenmeyen HATA: $e');
+      debugPrint('[AppleSignIn] beklenmeyen HATA');
       return null;
     }
   }
