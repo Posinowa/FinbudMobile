@@ -315,6 +315,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Apple Sign-In Button — sadece iOS'ta görünür
+                  if (Platform.isIOS) ...[
+                    SizedBox(
+                      height: 52,
+                      child: SignInWithAppleButton(
+                        onPressed: isLoading ? () {} : _handleAppleLogin,
+                        style: SignInWithAppleButtonStyle.black,
+                        borderRadius: BorderRadius.circular(12),
+                        text: 'Apple ile Devam Et',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
                   // Google Sign-In Button
                   SizedBox(
                     height: 52,
@@ -348,20 +362,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ),
-
-                  // Apple Sign-In Button — sadece iOS'ta görünür
-                  if (Platform.isIOS) ...[
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 52,
-                      child: SignInWithAppleButton(
-                        onPressed: isLoading ? () {} : _handleAppleLogin,
-                        style: SignInWithAppleButtonStyle.black,
-                        borderRadius: BorderRadius.circular(12),
-                        text: 'Apple ile Devam Et',
-                      ),
-                    ),
-                  ],
 
                   const SizedBox(height: 24),
                 ],
