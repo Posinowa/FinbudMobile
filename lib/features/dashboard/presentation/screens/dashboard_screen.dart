@@ -209,7 +209,7 @@ class _UpdateBanner extends ConsumerWidget {
     try {
       if (Platform.isAndroid) {
         // Önce Play Store uygulamasını dene (market:// scheme)
-        const packageName = 'com.finbud.finbud_app';
+        const packageName = 'com.posinowa.finbud';
         final marketUri = Uri.parse('market://details?id=$packageName');
         if (await canLaunchUrl(marketUri)) {
           await launchUrl(marketUri, mode: LaunchMode.externalApplication);

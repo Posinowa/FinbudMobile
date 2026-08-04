@@ -7,12 +7,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1048418570560:android:2d00c4aa00e866a4492aa5",
+        "mobilesdk_app_id": "1:1048418570560:android:840604d80a42eeaf492aa5",
         "android_client_info": {
-          "package_name": "com.finbud.finbud_app"
+          "package_name": "com.pasinowa.finbud"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1048418570560-9mf2vigl3st0kj34962dvicf0r9ee6tj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pasinowa.finbud",
+            "certificate_hash": "4a9a098347e66946d13fbabe8f970c47c80f932a"
+          }
+        },
         {
           "client_id": "1048418570560-h0b2vam3kds8cfqbp3q5po18m0ovqu7q.apps.googleusercontent.com",
           "client_type": 3
@@ -43,17 +51,17 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1048418570560:android:840604d80a42eeaf492aa5",
+        "mobilesdk_app_id": "1:1048418570560:android:27b8257e27ccbb17492aa5",
         "android_client_info": {
-          "package_name": "com.pasinowa.finbud"
+          "package_name": "com.posinowa.finbud"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1048418570560-9mf2vigl3st0kj34962dvicf0r9ee6tj.apps.googleusercontent.com",
+          "client_id": "1048418570560-obgeo66dm081fqbg3djfp99g0m84sidj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.pasinowa.finbud",
+            "package_name": "com.posinowa.finbud",
             "certificate_hash": "4a9a098347e66946d13fbabe8f970c47c80f932a"
           }
         },

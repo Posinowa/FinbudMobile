@@ -1,4 +1,4 @@
-package com.pasinowa.finbud
+package com.posinowa.finbud
 
 import io.flutter.embedding.android.FlutterActivity
 
