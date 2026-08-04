@@ -6,6 +6,7 @@ import 'package:finbud_app/features/user/presentation/providers/user_provider.da
 import 'package:finbud_app/features/user/presentation/providers/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,10 +18,21 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  String? _authProvider;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() => ref.read(userProvider.notifier).loadUser());
+    _loadAuthProvider();
+  }
+
+  Future<void> _loadAuthProvider() async {
+    const storage = FlutterSecureStorage();
+    final provider = await storage.read(key: 'auth_provider');
+    if (mounted) {
+      setState(() => _authProvider = provider);
+    }
   }
 
   @override
@@ -123,24 +135,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ── Şifre Değiştir ────────────────────────────────────────
-            _SettingsCard(
-              items: [
-                _SettingsItem(
-                  icon: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Image.asset(
-                      'assets/icons/password.png',
-                      fit: BoxFit.contain,
+            // ── Şifre Değiştir (sadece email ile giriş yapanlara) ─────
+            if (_authProvider == 'email' || _authProvider == null) ...[
+              _SettingsCard(
+                items: [
+                  _SettingsItem(
+                    icon: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Image.asset(
+                        'assets/icons/password.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
+                    label: 'Şifre Değiştir',
+                    onTap: () => _showChangePasswordSheet(context),
                   ),
-                  label: 'Şifre Değiştir',
-                  onTap: () => _showChangePasswordSheet(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 36),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            const SizedBox(height: 24),
 
             // ── Çıkış yap ────────────────────────────────────────────
             _LogoutButton(),

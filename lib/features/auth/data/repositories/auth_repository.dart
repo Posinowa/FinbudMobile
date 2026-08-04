@@ -24,7 +24,8 @@ class AuthRepository {
         // Token'ları güvenli depolamaya kaydet
         await _storage.write(key: 'access_token', value: data['access_token']);
         await _storage.write(key: 'refresh_token', value: data['refresh_token']);
-        
+        await _storage.write(key: 'auth_provider', value: 'email');
+
         return {
           'success': true,
           'access_token': data['access_token'],
@@ -90,8 +91,8 @@ class AuthRepository {
         final data = response.data;
 
         await _storage.write(key: 'access_token', value: data['access_token']);
-        await _storage.write(
-            key: 'refresh_token', value: data['refresh_token']);
+        await _storage.write(key: 'refresh_token', value: data['refresh_token']);
+        await _storage.write(key: 'auth_provider', value: 'google');
 
         return {
           'success': true,
@@ -151,6 +152,7 @@ class AuthRepository {
 
         await _storage.write(key: 'access_token', value: data['access_token']);
         await _storage.write(key: 'refresh_token', value: data['refresh_token']);
+        await _storage.write(key: 'auth_provider', value: 'apple');
 
         return {
           'success': true,
@@ -241,6 +243,7 @@ class AuthRepository {
   Future<void> logout() async {
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
+    await _storage.delete(key: 'auth_provider');
   }
 
   Future<String?> getAccessToken() async {
