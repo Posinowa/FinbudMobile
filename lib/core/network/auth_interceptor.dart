@@ -176,6 +176,7 @@ class AuthInterceptor extends Interceptor {
   Future<void> _performLogout() async {
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
+    await _storage.delete(key: 'auth_provider');
     NavigationService.toLoginAndClearStack();
   }
 }

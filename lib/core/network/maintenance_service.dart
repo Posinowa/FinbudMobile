@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppStatus {
@@ -32,7 +33,7 @@ class MaintenanceService {
   static Future<AppStatus> checkStatus() async {
     try {
       final baseUrl = dotenv.env['API_BASE_URL'] ?? '';
-      print('[Maintenance] API_BASE_URL: $baseUrl');
+      debugPrint('[Maintenance] API_BASE_URL: $baseUrl');
 
       final dio = Dio(
         BaseOptions(
@@ -43,16 +44,16 @@ class MaintenanceService {
       );
 
       final response = await dio.get('/status');
-      print('[Maintenance] response: ${response.data}');
+      debugPrint('[Maintenance] response: ${response.data}');
 
       if (response.statusCode == 200) {
         return AppStatus.fromJson(response.data as Map<String, dynamic>);
       }
 
-      print('[Maintenance] unexpected status code: ${response.statusCode}');
+      debugPrint('[Maintenance] unexpected status code: ${response.statusCode}');
       return AppStatus.maintenance();
     } catch (e) {
-      print('[Maintenance] HATA: $e');
+      debugPrint('[Maintenance] HATA: $e');
       return AppStatus.maintenance();
     }
   }
