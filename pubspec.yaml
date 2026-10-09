@@ -26,7 +26,10 @@ dependencies:
   lottie: ^3.1.0
   connectivity_plus: ^6.1.0
   google_sign_in: ^6.2.1
-  sign_in_with_apple: ^5.0.0
+  # sign_in_with_apple: ^5.0.0  # iOS'ta test edilip App Store'da yayınlanan sürüm (v1.0.3)
+  # Android build'i için 6.1.4'e yükseltildi: 5.0.0, Flutter 3.47'de kaldırılan v1 Android altyapısını kullanıyor.
+  # NOT: Sonraki iOS sürümünden önce Apple ile giriş iPhone'da test edilmeli.
+  sign_in_with_apple: ^6.1.4
   url_launcher: ^6.3.0
   app_links: ^6.4.0
 
